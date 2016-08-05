@@ -4,6 +4,7 @@ and to compress the file*/
 #include <stdio.h>
 #include <errno.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 // hash table whose key is <father label, symbol> and whose value is <label>
 
@@ -23,7 +24,7 @@ and to compress the file*/
 */
 
 struct hash_elem{
-	/*TYPE???? key;*/ 
+	unsigned long key;
 	uint32_t child_index;
 	int filled; //this number is a flag that signal if the elem is occupied
  	struct hash_elem* next; 
@@ -31,3 +32,23 @@ struct hash_elem{
 
 struct hash_elem* hash_table;
 int hash_table_size;
+
+
+
+unsigned long hash(unsigned char*);
+
+//create table of dimension dict_size
+int hash_table_create(uint64_t size);
+
+//add an element into the hash table
+int hash_add(uint32_t father, char symbol, uint32_t child);
+
+//initialize the hash with all the first level children
+int hash_init();
+
+//look for an element into the hash table
+
+//reset the hash table
+
+
+
