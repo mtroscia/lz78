@@ -4,6 +4,7 @@ it contains useful info about the original and compressed file*/
 #include <stdio.h>
 #include <time.h>
 #include <stdint.h>
+#include "bitio.h"
 
 struct header{
 	char* compr_alg;

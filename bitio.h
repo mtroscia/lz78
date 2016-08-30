@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <stdint.h>
+#include <strings.h>
 
 struct bitio;
 
