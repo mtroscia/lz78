@@ -2,10 +2,13 @@
 #include <string.h>
 
 int hash_add(uint32_t, char, uint32_t);
+int hash_init();
+int hash_reset();
 unsigned long generate_hash_index(uint32_t, char);
 /****************************************************************************************************/
 void print_hash_table();
 /******************************************************************************************************/
+
 
 unsigned long hash(unsigned char *str){
     unsigned long hash = 5381;
@@ -47,6 +50,8 @@ int hash_init(){
 	int i, ret;
 	char c;
 	
+	actual_bits_counter=9;
+	
 	//aggiungiamo tutti i caratteri ASCII
 	for (i=0; i<=255;i++)
 	{
@@ -73,7 +78,11 @@ int hash_add(uint32_t father, char symbol, uint32_t child){
 	unsigned long index;
 	
 	if (child>dictionary_size)
-		reset();
+		hash_reset();
+	
+	//eventually update the number of bits for the symbols
+	if((1<<actual_bits_counter)==hash_elem_counter) 
+			actual_bits_counter++;
 	
 	//obtain the index into the hash table
 	index=generate_hash_index(father, symbol);
@@ -110,8 +119,7 @@ int hash_add(uint32_t father, char symbol, uint32_t child){
 
 
 
-unsigned long generate_hash_index(uint32_t father, char symbol)
-{
+unsigned long generate_hash_index(uint32_t father, char symbol){
 	unsigned char buffer[33];
 	char s[2];
 	
@@ -138,8 +146,7 @@ search a node in the hash table using father-char as key.
 if it found the node, then it return the index.
 Otherwise it return 0;
 ********************************************************/
-uint32_t hash_search (uint32_t father, char symbol)
-{
+uint32_t hash_search (uint32_t father, char symbol){
 	unsigned long index;
 	int not_found;
 	
@@ -168,8 +175,7 @@ uint32_t hash_search (uint32_t father, char symbol)
 	return hash_table[index].child_index;
 }
 
-int reset()
-{
+int hash_reset(){
 	int ret;
 	
 	//<resetta tutti i campi della hash>
@@ -187,11 +193,8 @@ int reset()
 
 
 
-
-
 /************************************ONLY FOR TESTING PURPOSES******************************************************/
-void print_hash_table()
-{
+void print_hash_table(){
 	FILE *f;
 	int i;
 	
