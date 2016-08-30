@@ -2,9 +2,13 @@
 #include <string.h>
 
 int hash_add(uint32_t, char, uint32_t);
+int hash_init();
+int hash_reset();
+unsigned long generate_hash_index(uint32_t, char);
 /****************************************************************************************************/
 void print_hash_table();
 /******************************************************************************************************/
+
 
 unsigned long hash(unsigned char *str){
     unsigned long hash = 5381;
@@ -35,7 +39,7 @@ int hash_table_create(uint64_t size){
 	ret = hash_init();
 	if (ret!=0){
 		printf("Error: hash table has not been initialized.\n");
-		//free()
+		free(hash_table);
 		return -1;
 	}
 	
@@ -45,6 +49,8 @@ int hash_table_create(uint64_t size){
 int hash_init(){
 	int i, ret;
 	char c;
+	
+	actual_bits_counter=9;
 	
 	//aggiungiamo tutti i caratteri ASCII
 	for (i=0; i<=255;i++)
@@ -69,25 +75,17 @@ int hash_init(){
 }
 
 int hash_add(uint32_t father, char symbol, uint32_t child){
-	unsigned char buffer[33];
-	char s[2];
-	
 	unsigned long index;
-
+	
 	if (child>dictionary_size)
-		reset();
+		hash_reset();
 	
-	//<generate the string using father and symbol>
-	sprintf(buffer, "%d", father);
-	//symbol from char to string
-	sprintf(s, "%c", symbol);
-	strcat (buffer,s);
-	//compute hash for the string
-	index=hash(buffer);
-	//obtain an index from the hash
-	index%=hash_table_size;
+	//eventually update the number of bits for the symbols
+	if((1<<actual_bits_counter)==hash_elem_counter) 
+			actual_bits_counter++;
 	
-	printf("string: %s- hash index: %lu\n", buffer, index);
+	//obtain the index into the hash table
+	index=generate_hash_index(father, symbol);
 	
 	//add the elem
 	int collision=1;
@@ -119,8 +117,65 @@ int hash_add(uint32_t father, char symbol, uint32_t child){
 	return 0;
 }
 
-int reset()
-{
+
+
+unsigned long generate_hash_index(uint32_t father, char symbol){
+	unsigned char buffer[33];
+	char s[2];
+	
+	unsigned long index;
+	
+	//<generate the string using father and symbol>
+	sprintf((char*)buffer, "%d", father);
+	//symbol from char to string
+	sprintf(s, "%c", symbol);
+	strcat ((char*)buffer,s);
+	//compute hash for the string
+	index=hash(buffer);
+	//obtain an index from the hash
+	index%=hash_table_size;
+	
+	printf("string: %s- hash index: %lu\n", buffer, index);
+	
+	return index;
+}
+
+
+/********************************************************
+search a node in the hash table using father-char as key.
+if it found the node, then it return the index.
+Otherwise it return 0;
+********************************************************/
+uint32_t hash_search (uint32_t father, char symbol){
+	unsigned long index;
+	int not_found;
+	
+	index=generate_hash_index(father, symbol);
+	
+	not_found=1;
+	do
+	{
+		if (hash_table[index].father_index==father && hash_table[index].character==symbol)
+		{
+			//I have found the wanted entry
+			not_found=0;
+			printf("%i %c found:\t child value=%i\n",hash_table[index].father_index,
+					hash_table[index].character,hash_table[index].child_index );
+		}else
+		{
+			if (hash_table[index].child_index==0)
+			{
+				//this entry is an empty one
+				return 0;
+			}else  //search into the next entry
+				index=(index+1)%hash_table_size;
+		}		
+	}while (not_found);
+	
+	return hash_table[index].child_index;
+}
+
+int hash_reset(){
 	int ret;
 	
 	//<resetta tutti i campi della hash>
@@ -138,11 +193,8 @@ int reset()
 
 
 
-
-
 /************************************ONLY FOR TESTING PURPOSES******************************************************/
-void print_hash_table()
-{
+void print_hash_table(){
 	FILE *f;
 	int i;
 	

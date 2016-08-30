@@ -25,7 +25,7 @@ int main(int argc, char *argv []) {
     int fd, compr=-1, s=0, h=0, ret;
     //compr is set to 1 if we want to compress, set to 2 if we want to decompress
     char* source=NULL, *dest=NULL;
-    unsigned int dict_size=DICT_SIZE, d_dict_size;
+    unsigned int dict_size=DICT_SIZE;//, d_dict_size;
     struct bitio* fd_bitio = NULL;
     int opt;
 	
@@ -125,10 +125,14 @@ int main(int argc, char *argv []) {
 	ret = hash_table_create(dict_size);
 	if (ret==-1)
 	{
-		printf("Unable to create the hash table");
+		printf("Unable to create the hash table\n");
 		return -1;
 	}
 	
-		
+	ret=hash_search(0,'i');
+	printf("search... DONE index=%i\n", ret);
+	
+
+	//printf("number of bits = %i\n", compute_bits());	
 	return 0;
 }
