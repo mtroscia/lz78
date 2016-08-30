@@ -100,8 +100,43 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		//<add header>
-		//<call compress function - pass dict_size>
+		
+		//open the bitio stream in write mode
+		my_bitio=bit_open(dest,1);
+		if (my_bitio==NULL)
+		{
+			printf("Unable to open a bitio stream\n");
+			return -1;
+		}
+		
+		//initialize the hash function
+		ret = hash_table_create(dict_size);
+		if (ret==-1)
+		{
+			printf("Unable to create the hash table\n");
+			return -1;
+		}
+		
+		//call the compression algorithm
+		ret = compress (source);
+		if (ret==-1)
+		{
+			printf("Unable to perform the compression\n");
+			free(hash_table);
+			return -1;
+		}
+		
+		//close my_bitio
+		ret=bit_close(my_bitio);
+		if (ret<0)
+		{
+			printf("Unable to close the bitio stream\n");
+			free(hash_table);
+			return -1;
+		}
+		
 		printf("Compression completed.\n");
+		free(hash_table);
 	} else if (compr==1){		//decompressing
 		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
 		if (fd < 0){
@@ -120,19 +155,6 @@ int main(int argc, char *argv []) {
 	}
 
 	printf("End of main...\n");
-	
-	
-	ret = hash_table_create(dict_size);
-	if (ret==-1)
-	{
-		printf("Unable to create the hash table\n");
-		return -1;
-	}
-	
-	ret=hash_search(0,'i');
-	printf("search... DONE index=%i\n", ret);
-	
-
-	//printf("number of bits = %i\n", compute_bits());	
+		
 	return 0;
 }
