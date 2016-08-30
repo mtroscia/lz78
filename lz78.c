@@ -131,6 +131,8 @@ int main(int argc, char *argv []) {
 	
 	ret=hash_search(0,'i');
 	printf("search... DONE index=%i\n", ret);
-		
+	
+
+	//printf("number of bits = %i\n", compute_bits());	
 	return 0;
 }

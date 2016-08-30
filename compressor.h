@@ -33,29 +33,27 @@ struct hash_elem{
 };
 
 struct hash_elem* hash_table;
-int hash_table_size; //max number of element in the hash table
-int dictionary_size; //max number of element in the dictionary
-int hash_elem_counter; //number of element in the hash table
-int hash_elem_pointer; //pointer to the actual node
-
-
-
+int hash_table_size; 	//max number of element in the hash table
+int dictionary_size; 	//max number of element in the dictionary
+int hash_elem_counter;	//number of element in the hash table
+int hash_elem_pointer;	//pointer to the actual node
+int actual_bits_counter;//number of bits for the current symbol
 unsigned long hash(unsigned char*);
 
 //create table of dimension dict_size
 int hash_table_create(uint64_t size);
 
 //add an element into the hash table
-int hash_add(uint32_t father, char symbol, uint32_t child);
+//int hash_add(uint32_t father, char symbol, uint32_t child);
 
 //initialize the hash with all the first level children
-int hash_init();
+//int hash_init();
 
 //look for an element into the hash table
 uint32_t hash_search(uint32_t father, char symbol);
 
 //reset the hash table
-int reset();
+//int reset();
 
 
 
