@@ -52,6 +52,7 @@ int hash_add(uint32_t father, char symbol, uint32_t child);
 int hash_init();
 
 //look for an element into the hash table
+uint32_t hash_search(uint32_t father, char symbol);
 
 //reset the hash table
 int reset();
