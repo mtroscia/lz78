@@ -34,8 +34,12 @@ struct bitio* bit_open(const char* name,u_int mode)
 	}
 	
 	b->mode=mode;
+	
+	/************************si potrebbero omettere*********/
 	b->wp=0;
 	b->rp=0;
+	/*******************************************************/
+	
 	return b;
 }
 
