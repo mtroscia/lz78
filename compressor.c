@@ -61,7 +61,6 @@ int hash_init(){
 		ret = hash_add(0,c,++hash_elem_counter);
 		if (ret!=0){
 			printf("Error in hash_add");
-			free(hash_table);
 			return -1;
 		}
 		printf ("Actual hash_elem_counter = %i\n", hash_elem_counter);
@@ -135,7 +134,7 @@ unsigned long generate_hash_index(uint32_t father, char symbol){
 	//obtain an index from the hash
 	index%=hash_table_size;
 	
-	printf("string: %s- hash index: %lu\n", buffer, index);
+	//printf("string: %s- hash index: %lu\n", buffer, index);
 	
 	return index;
 }
@@ -185,7 +184,6 @@ int hash_reset(){
 	ret=hash_init();	
 	if (ret!=0){
 			printf("Error reinitialize the hash table");
-			free(hash_table);
 			return -1;
 	}
 	return 0;	
@@ -213,3 +211,83 @@ void print_hash_table(){
 }
 	
 /******************************************************************************************************************/
+
+
+int emit(uint64_t symbol)
+{
+	int ret;
+	
+	ret = bit_write(my_bitio, actual_bits_counter, symbol);
+	if (ret<0)
+	{
+		printf("Unable to perform the bit_write\n");
+		return -1;
+	}
+			
+	
+	return 0;
+}
+
+int compress(char* input_file_name)
+{
+	int ret, c;
+	FILE * input_file;
+	
+	input_file=fopen(input_file_name, "r");
+	
+	//read a character and perform the compression until we found the EOF
+	while(1){
+		c=getc(input_file);
+		
+		printf("carattere letto %c\n", c);
+		
+		again:	if (c==EOF)
+				{
+					printf("EOF reached\n");
+					
+					//emit the EOF value
+					ret = emit ((uint64_t)0);
+					if (ret<0)
+					{
+						printf("Unable to emit the EOF\n");
+						return -1;
+					}
+					
+					printf("emit:\t\t\t<0>\n");
+					break;
+				}
+			
+				//search the character into the hash table
+				ret = hash_search (hash_elem_pointer, (char)c);
+				if (ret!=0)
+				{
+					//I have found the correspondent child so I simply advance the pointer 
+					hash_elem_pointer=ret;
+				}
+				else
+				{
+					//emit the father_index
+					ret = emit ((uint64_t)hash_elem_pointer);
+					if (ret<0)
+					{
+						printf("Unable to emit the EOF\n");
+						return -1;
+					}
+					printf("emit:\t\t\t<%i>\n", hash_elem_pointer);
+					
+					//Add the new node 
+					ret = hash_add(hash_elem_pointer,(char)c,++hash_elem_counter);
+					if (ret!=0){
+						printf("Error in hash_add");
+						return -1;
+					}
+					
+					//restart the search from the root
+					hash_elem_pointer=0;
+					//now i search the caracter c
+					goto again;
+				}
+	}
+	
+	return 0;
+}

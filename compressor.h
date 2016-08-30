@@ -6,6 +6,8 @@ and to compress the file*/
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "bitio.h"
+
 // hash table whose key is <father label, symbol> and whose value is <label>
 
 /*	-) initilize hash table (first level children)
@@ -40,8 +42,13 @@ int hash_elem_pointer;	//pointer to the actual node
 int actual_bits_counter;//number of bits for the current symbol
 unsigned long hash(unsigned char*);
 
+struct bitio* my_bitio;
+
 //create table of dimension dict_size
 int hash_table_create(uint64_t size);
+
+//compress algorithm
+int compress(char* input_file_name);
 
 //add an element into the hash table
 //int hash_add(uint32_t father, char symbol, uint32_t child);
@@ -50,7 +57,7 @@ int hash_table_create(uint64_t size);
 //int hash_init();
 
 //look for an element into the hash table
-uint32_t hash_search(uint32_t father, char symbol);
+//uint32_t hash_search(uint32_t father, char symbol);
 
 //reset the hash table
 //int reset();
