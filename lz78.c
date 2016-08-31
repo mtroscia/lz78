@@ -42,7 +42,7 @@ void print_content(char*dest)
 }
 
 int main(int argc, char *argv []) {
-    int fd, compr=-1, s=0, h=0, ret;
+    int fd, compr=-1,ret;// s=0, h=0;
     //compr is set to 1 if we want to compress, set to 2 if we want to decompress
     char* source=NULL, *dest=NULL;
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
@@ -65,11 +65,11 @@ int main(int argc, char *argv []) {
 				dest = optarg; //take the output name from optarg
 				break;
 			case 's':
-				s=1;
+				//s=1;
 				dict_size = atoi(optarg);
 				break;
 			case 'h':
-				h=1;
+				//h=1;
 				print_help();
             break;
         case '?':
