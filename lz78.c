@@ -21,6 +21,26 @@ void print_help()
 			-h \thelp\n\n");
 }
 
+void print_content(char*dest)
+{
+	my_bitio=bit_open(dest, 0);
+	uint64_t data;
+	int ret;
+	
+	ret=0;
+	while (1)
+	{
+		ret=bit_read(my_bitio, 9, &data);
+		if (ret<0)
+		{
+			break;
+		}
+		
+		printf ("read: %lu ", data);
+		
+	}
+}
+
 int main(int argc, char *argv []) {
     int fd, compr=-1, s=0, h=0, ret;
     //compr is set to 1 if we want to compress, set to 2 if we want to decompress
@@ -126,16 +146,10 @@ int main(int argc, char *argv []) {
 			return -1;
 		}
 		
-		//close my_bitio
-		ret=bit_close(my_bitio);
-		if (ret<0)
-		{
-			printf("Unable to close the bitio stream\n");
-			free(hash_table);
-			return -1;
-		}
-		
 		printf("Compression completed.\n");
+		//******************************************************************************/
+		print_content(dest);
+		/******************************************************************************/
 		free(hash_table);
 	} else if (compr==1){		//decompressing
 		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
@@ -155,6 +169,8 @@ int main(int argc, char *argv []) {
 	}
 
 	printf("End of main...\n");
+	
+	
 		
 	return 0;
 }
