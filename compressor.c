@@ -245,6 +245,15 @@ int compress(char* input_file_name)
 				{
 					printf("EOF reached\n");
 					
+					//emit the last father_index
+					ret = emit ((uint64_t)hash_elem_pointer);
+					if (ret<0)
+					{
+						printf("Unable to emit the EOF\n");
+						return -1;
+					}
+					printf("<%i>\n", hash_elem_pointer);
+					
 					//emit the EOF value
 					ret = emit ((uint64_t)0);
 					if (ret<0)
@@ -253,7 +262,16 @@ int compress(char* input_file_name)
 						return -1;
 					}
 					
-					printf("emit:\t\t\t<0>\n");
+					printf("<0>\n");
+					
+					//close my_bitio
+					ret=bit_close(my_bitio);
+					if (ret<0)
+					{
+						printf("Unable to close the bitio stream\n");
+						free(hash_table);
+						return -1;
+					}
 					break;
 				}
 			
@@ -273,7 +291,7 @@ int compress(char* input_file_name)
 						printf("Unable to emit the EOF\n");
 						return -1;
 					}
-					printf("emit:\t\t\t<%i>\n", hash_elem_pointer);
+					printf("<%i>\n", hash_elem_pointer);
 					
 					//Add the new node 
 					ret = hash_add(hash_elem_pointer,(char)c,++hash_elem_counter);
@@ -284,7 +302,7 @@ int compress(char* input_file_name)
 					
 					//restart the search from the root
 					hash_elem_pointer=0;
-					//now i search the caracter c
+					//now i search the caracter c again
 					goto again;
 				}
 	}
