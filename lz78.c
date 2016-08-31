@@ -21,8 +21,28 @@ void print_help()
 			-h \thelp\n\n");
 }
 
+void print_content(char*dest)
+{
+	my_bitio=bit_open(dest, 0);
+	uint64_t data;
+	int ret;
+	
+	ret=0;
+	while (1)
+	{
+		ret=bit_read(my_bitio, 9, &data);
+		if (ret<0)
+		{
+			break;
+		}
+		
+		printf ("read: %lu ", data);
+		
+	}
+}
+
 int main(int argc, char *argv []) {
-    int fd, compr=-1, s=0, h=0, ret;
+    int fd, compr=-1,ret;// s=0, h=0;
     //compr is set to 1 if we want to compress, set to 2 if we want to decompress
     char* source=NULL, *dest=NULL;
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
@@ -45,11 +65,11 @@ int main(int argc, char *argv []) {
 				dest = optarg; //take the output name from optarg
 				break;
 			case 's':
-				s=1;
+				//s=1;
 				dict_size = atoi(optarg);
 				break;
 			case 'h':
-				h=1;
+				//h=1;
 				print_help();
             break;
         case '?':
@@ -100,8 +120,37 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		//<add header>
-		//<call compress function - pass dict_size>
+		
+		//open the bitio stream in write mode
+		my_bitio=bit_open(dest,1);
+		if (my_bitio==NULL)
+		{
+			printf("Unable to open a bitio stream\n");
+			return -1;
+		}
+		
+		//initialize the hash function
+		ret = hash_table_create(dict_size);
+		if (ret==-1)
+		{
+			printf("Unable to create the hash table\n");
+			return -1;
+		}
+		
+		//call the compression algorithm
+		ret = compress (source);
+		if (ret==-1)
+		{
+			printf("Unable to perform the compression\n");
+			free(hash_table);
+			return -1;
+		}
+		
 		printf("Compression completed.\n");
+		//******************************************************************************/
+		print_content(dest);
+		/******************************************************************************/
+		free(hash_table);
 	} else if (compr==1){		//decompressing
 		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
 		if (fd < 0){
@@ -122,17 +171,6 @@ int main(int argc, char *argv []) {
 	printf("End of main...\n");
 	
 	
-	ret = hash_table_create(dict_size);
-	if (ret==-1)
-	{
-		printf("Unable to create the hash table\n");
-		return -1;
-	}
-	
-	ret=hash_search(0,'i');
-	printf("search... DONE index=%i\n", ret);
-	
-
-	//printf("number of bits = %i\n", compute_bits());	
+		
 	return 0;
 }
