@@ -122,16 +122,16 @@ int main(int argc, char *argv []) {
 		//<add header>
 		
 		//open the bitio stream in write mode
-		my_bitio=bit_open(dest,1);
-		if (my_bitio==NULL)
+		my_bitio = bit_open(dest,1);
+		if (my_bitio == NULL)
 		{
 			printf("Unable to open a bitio stream\n");
 			return -1;
 		}
 		
-		//initialize the hash function
+		//initialize the hash table
 		ret = hash_table_create(dict_size);
-		if (ret==-1)
+		if (ret == -1)
 		{
 			printf("Unable to create the hash table\n");
 			return -1;
@@ -139,7 +139,7 @@ int main(int argc, char *argv []) {
 		
 		//call the compression algorithm
 		ret = compress (source);
-		if (ret==-1)
+		if (ret == -1)
 		{
 			printf("Unable to perform the compression\n");
 			free(hash_table);
