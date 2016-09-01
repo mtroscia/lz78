@@ -88,7 +88,7 @@ int bit_write(struct bitio * b, uint32_t size, uint64_t data)
 	}
 	else{
 		/********************DIFFERENT FROM LESSON***************/
-		data&=(1UL<<space)-1; 	//pick the rightmost space bits		
+		//data&=(1UL<<space)-1; 	//pick the rightmost space bits		
 		b->data|=data<<b->wp;	//copy the block into the buffer from wp on
 
 		if(fwrite((void*)&b->data, 1, 8, b->f)<=0){		//empty b->data
@@ -137,7 +137,7 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 			if b->wp>=size-space, we can read the remaining bits and we can add them to the data buffer*/
 			
 			/********************DIFFERENT FROM LESSON***************/
-			*data^=*data; //clear all bits of data buffer
+			//*data^=*data; //clear all bits of data buffer
 			*data|=b->data<<space;
 			
 			/********************DIFFERENT FROM LESSON***************/
