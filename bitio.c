@@ -19,7 +19,7 @@ struct bitio* bit_open(const char* name, uint32_t mode)
 		return NULL;			
 	}
 
-	b=calloc(1,sizeof(struct bitio));
+	b=calloc(1, sizeof(struct bitio));
 	if(b==NULL){
 		errno=ENOMEM;
 		return NULL;	
