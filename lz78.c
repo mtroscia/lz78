@@ -36,7 +36,7 @@ void print_content(char*dest)
 			break;
 		}
 		
-		printf ("read: %lu ", data);
+		printf ("read: %llu ", data);
 		
 	}
 }

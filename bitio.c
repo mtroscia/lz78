@@ -3,13 +3,13 @@
 struct bitio{
 	FILE* f; //pointer to the file
 	uint64_t data; // local buffer
-	u_int wp; //write index pointer 
-	u_int rp; //read index pointer
-	u_int mode; //0=>read  1=>write 
+	uint32_t wp; //write index pointer 
+	uint32_t rp; //read index pointer
+	uint32_t mode; //0=>read  1=>write 
 };
 
 
-struct bitio* bit_open(const char* name,u_int mode)
+struct bitio* bit_open(const char* name, uint32_t mode)
 {
 	struct bitio* b;
 	
@@ -66,7 +66,7 @@ int bit_close(struct bitio* b)
 }
 
 
-int bit_write(struct bitio * b, u_int size, uint64_t data)
+int bit_write(struct bitio * b, uint32_t size, uint64_t data)
 {
 	int space;
 	if(b==NULL || b->mode!=1 || size>64){
@@ -88,7 +88,7 @@ int bit_write(struct bitio * b, u_int size, uint64_t data)
 	}
 	else{
 		/********************DIFFERENT FROM LESSON***************/
-		data&=(1UL<<space)-1; 	//pick the rightmost space bits		
+		//data&=(1UL<<space)-1; 	//pick the rightmost space bits		
 		b->data|=data<<b->wp;	//copy the block into the buffer from wp on
 
 		if(fwrite((void*)&b->data, 1, 8, b->f)<=0){		//empty b->data
@@ -103,7 +103,7 @@ int bit_write(struct bitio * b, u_int size, uint64_t data)
 }
 
 
-int bit_read(struct bitio* b,u_int size,uint64_t *data)
+int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 {
 	int space;
 	if(b==NULL || b-> mode!=0 || size>64){
@@ -137,7 +137,7 @@ int bit_read(struct bitio* b,u_int size,uint64_t *data)
 			if b->wp>=size-space, we can read the remaining bits and we can add them to the data buffer*/
 			
 			/********************DIFFERENT FROM LESSON***************/
-			*data^=*data; //clear all bits of data buffer
+			//*data^=*data; //clear all bits of data buffer
 			*data|=b->data<<space;
 			
 			/********************DIFFERENT FROM LESSON***************/
