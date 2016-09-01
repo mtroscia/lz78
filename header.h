@@ -7,13 +7,14 @@ it contains useful info about the original and compressed file*/
 #include "bitio.h"
 
 struct header{
-	char* compr_alg;
+	//bit to say if file is compressed or not
+	char* compr_alg;	//numerical code --> int
 	int dict_size;
 	int symb_size;
 	//file metadata
 	char* orig_filename;
 	int orig_size;
-	time_t orig_creation_time;
+	time_t orig_creation_time; // maybe better double (difference of times)
 	//checksum BUT HOW TO DO IT????!?!?
 };
 
