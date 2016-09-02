@@ -48,6 +48,7 @@ int main(int argc, char *argv []) {
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
     struct bitio* fd_bitio = NULL;
     int opt;
+	FILE* file;
 	
 
     while ((opt = getopt(argc,argv,"cdi:o:s:h"))!=-1) {
@@ -108,26 +109,30 @@ int main(int argc, char *argv []) {
 	}
     
 	if (compr==0){		//compressing
-		fd = open(source, O_RDONLY);
-		if (fd < 0){
+		file = fopen(source, "r");
+		if (file < 0){
 			fprintf(stderr, "Error: file can't be opened in read mode\n");
 			exit(1);
 		}
-		fd_bitio = bit_open(dest, 1);
-		if (fd_bitio == NULL){
+		my_bitio = bit_open(dest, 1);
+		if (my_bitio == NULL){
 			fprintf(stderr, "Error: file can't be opened in write mode\n");
-			close(fd);
+			fclose(file);
 			exit(1);
+		}	
+		
+		ret = add_header(my_bitio, file, source);
+		if (ret == -1) {
+			return -1;
 		}
-		//<add header>
 		
 		//open the bitio stream in write mode
-		my_bitio = bit_open(dest,1);
+		/*my_bitio = bit_open(dest, 1);
 		if (my_bitio == NULL)
 		{
 			printf("Unable to open a bitio stream\n");
 			return -1;
-		}
+		}*/
 		
 		//initialize the hash table
 		ret = hash_table_create(dict_size);
