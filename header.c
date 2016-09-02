@@ -1,6 +1,6 @@
 #include "header.h"
 
-int add_checksum(FILE* fd, int size, unsigned char** out) {	
+int create_checksum(FILE* fd, int size, unsigned char** out) {	
 	int ret, ret_r, i;
 	SHA256_CTX* ctx;
 	int buf_size = 128;
@@ -8,6 +8,7 @@ int add_checksum(FILE* fd, int size, unsigned char** out) {
 	int num_blocks = size/buf_size + 1;
 	
 	printf("Composing SHA256...\t");
+	fseek(fd, 0, SEEK_SET);
 	
 	ctx = (SHA256_CTX*)malloc(sizeof(SHA256_CTX));
 
@@ -101,7 +102,7 @@ struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_s
 	hd->orig_size = file_info.st_size;
 	hd->orig_creation_time = (uintmax_t)file_info.st_ctime;
 	
-	ret = add_checksum(file, hd->orig_size, &out);	
+	ret = create_checksum(file, hd->orig_size, &out);	
 	if (ret == -1) {
 		printf("Error in creating the checksum...\n");
 		free(hd);

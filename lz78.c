@@ -176,7 +176,7 @@ int main(int argc, char *argv []) {
 		//******************************************************************************/
 		//print_content(dest);
 		/******************************************************************************/
-		free(hash_table);
+		//free(hash_table);
 	} else if (compr==1){		//decompressing
 		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
 		if (fd < 0){
@@ -203,7 +203,7 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		/*ret = check_integrity(hd, dest); <---- dest but maybe better the pointer to the file??!?
+		/*ret = check_integrity(hd, my_bitio->f); 
 		if (ret == -1) {
 			exit(1);
 		}*/
