@@ -27,8 +27,22 @@ and functions to decompress*/
 */
 
 struct array_elem{
-	int father_num;
-	uint8_t c;
+	uint32_t father_index;
+	uint8_t character;
 };
 
-struct array_elem* decomp_tree;
+struct array_elem* dictionary;
+int dictionary_size; 	//max number of element in the array
+int array_elem_counter;	//number of element in the hash table
+int actual_bits_counter;//number of bits for the current symbol
+char* decomp_buffer;
+
+
+
+
+//???int hash_elem_pointer;	//pointer to the actual node
+
+unsigned long hash(unsigned char*);
+
+//initialize all the stuff
+int array_create();

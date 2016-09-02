@@ -157,14 +157,27 @@ int main(int argc, char *argv []) {
 			fprintf(stderr, "Error: file can't be opened in write mode\n");
 			exit(1);
 		}
+		
+		
+		
+		
+		//initialize all the data structure
+		ret = array_create();
+		if (ret < 0){
+			printf("Unable to perform the initialization phase.\n");
+		}
+		
 		fd_bitio = bit_open(source, 0);
 		if (fd_bitio == NULL){
 			fprintf(stderr, "Error: file can't be opened in read mode\n");
 			close(fd);
 			exit(1);
 		}
+		
 		//<check header>
+		
 		//<call decompress function>
+		
 		printf("Decompression completed.\n");
 	}
 
