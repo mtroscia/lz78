@@ -80,8 +80,8 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 	if (child > dictionary_size)
 		hash_reset();
 	
-	//possibly update the number of bits needed for the symbols
-	if((1<<actual_bits_counter)==hash_elem_counter) 
+	//eventually update the number of bits for the symbols
+	if((1<<actual_bits_counter)==hash_elem_counter+1) 
 			actual_bits_counter++;
 	
 	//obtain the index into the hash table
