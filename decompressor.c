@@ -82,7 +82,7 @@ int array_reset(){
 
 
 //initialize decompression
-int init_decomp(char* dest_file_name)
+int init_decomp(char* source_file_name)
 {	
 	int ret;
 	
@@ -104,7 +104,7 @@ int init_decomp(char* dest_file_name)
 	}
 	return 0;
 	
-	my_bitio=bit_open(dest_file_name, 1);
+	my_bitio=bit_open(source_file_name, 1);
 	if (my_bitio==NULL){
 		printf ("Error in bit_open()\n");
 		free (dictionary);
@@ -129,16 +129,9 @@ int extract(struct bitio* bitr){
 }
 
 
-int decompress(char* input_file_name)
+int decompress(char* dest_file_name)
 {
-	struct bitio* bitr;
-	
-	bitr=bit_open(input_file_name, 0);
-	if (bitr==NULL){
-		printf ("Error in bit_open()\n");
-		free (dictionary);
-		return -1;
-	}
+	//open dest with fopen
 	
 	//<check the header>
 	
