@@ -12,7 +12,6 @@ it contains useful info about the original and compressed file*/
 
 struct header{
 	uint8_t compressed;
-	int header_len;
 	
 	//file metadata
 	uint8_t orig_filename_len;
@@ -30,3 +29,4 @@ struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_s
 int add_header(struct bitio* my_bitio, struct header* hd);
 
 struct header* get_header(struct bitio* file);
+int check_integrity(struct header* hd, char* file_name);
