@@ -43,6 +43,22 @@ struct bitio* bit_open(const char* name, uint32_t mode)
 	return b;
 }
 
+int bit_flush(struct bitio* b)
+{
+	int ret=0;	
+	if(b==NULL){
+		errno=EINVAL;
+		return -1;	
+	}
+	
+	if(b->mode==1 && b->wp>0){
+		/********************DIFFERENT FROM LESSON***************/
+		if(fwrite((void*)&b->data, 1, ((b->wp)+7)/8,  b->f)<=0){
+			ret=-1;		
+		}
+		b->wp = 0;
+	}
+}
 
 int bit_close(struct bitio* b)
 {
@@ -50,13 +66,6 @@ int bit_close(struct bitio* b)
 	if(b==NULL){
 		errno=EINVAL;
 		return -1;	
-	}
-
-	if(b->mode==1 && b->wp>0){
-		/********************DIFFERENT FROM LESSON***************/
-		if(fwrite((void*)&b->data, 1, ((b->wp)+7)/8,  b->f)<=0){
-			ret=-1;		
-		}	
 	}
 	
 	fclose(b->f);

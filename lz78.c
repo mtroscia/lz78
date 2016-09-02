@@ -146,6 +146,17 @@ int main(int argc, char *argv []) {
 			return -1;
 		}
 		
+		//----> update header
+		
+		//close bitio stream
+		ret = bit_close(my_bitio);
+		if (ret == -1)
+		{
+			printf("Unable to perform the compression\n");
+			free(hash_table);
+			return -1;
+		}
+		
 		printf("Compression completed.\n");
 		//******************************************************************************/
 		print_content(dest);

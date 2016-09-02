@@ -254,11 +254,11 @@ int compress (char* input_file_name)
 					}					
 					printf("<0>\n");
 					
-					//close my_bitio
-					ret = bit_close(my_bitio);
+					//flush my_bitio stream
+					ret = bit_flush(my_bitio);
 					if (ret<0)
 					{
-						printf("Unable to close the bitio stream\n");
+						printf("Unable to flush the bitio stream\n");
 						free(hash_table);
 						return -1;
 					}
