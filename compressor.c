@@ -241,6 +241,7 @@ int compress (char* input_file_name)
 					if (ret<0)
 					{
 						printf("Unable to emit the EOF\n");
+						free(hash_table);
 						return -1;
 					}
 					printf("<%i>\n", hash_elem_pointer);
@@ -250,6 +251,7 @@ int compress (char* input_file_name)
 					if (ret<0)
 					{
 						printf("Unable to emit the EOF\n");
+						free(hash_table);
 						return -1;
 					}					
 					printf("<0>\n");
@@ -279,6 +281,7 @@ int compress (char* input_file_name)
 					if (ret<0)
 					{
 						printf("Unable to emit the EOF\n");
+						free(hash_table);
 						return -1;
 					}
 					printf("<%i>\n", hash_elem_pointer);
@@ -287,6 +290,7 @@ int compress (char* input_file_name)
 					ret = hash_add(hash_elem_pointer, (char)c, ++hash_elem_counter);
 					if (ret!=0){
 						printf("Error in hash_add");
+						free(hash_table);
 						return -1;
 					}
 					
@@ -296,5 +300,7 @@ int compress (char* input_file_name)
 					goto again;
 				}
 	}
+	
+	free(hash_table);
 	return 0;
 }

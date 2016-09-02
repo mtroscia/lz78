@@ -1,5 +1,6 @@
 #include "decompressor.h"
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -81,7 +82,7 @@ int array_reset(){
 
 
 //initialize decompression
-int array_create()
+int init_decomp(char* dest_file_name)
 {	
 	int ret;
 	
@@ -103,4 +104,55 @@ int array_create()
 	}
 	return 0;
 	
+	my_bitio=bit_open(dest_file_name, 1);
+	if (my_bitio==NULL){
+		printf ("Error in bit_open()\n");
+		free (dictionary);
+		return -1;
+	}
+	
 }
+
+int decode(struct bitio* bitr)
+{
+	
+	
+	return 0;
+}
+
+
+int extract(struct bitio* bitr){
+	
+	
+	
+	return 0;
+}
+
+
+int decompress(char* input_file_name)
+{
+	struct bitio* bitr;
+	
+	bitr=bit_open(input_file_name, 0);
+	if (bitr==NULL){
+		printf ("Error in bit_open()\n");
+		free (dictionary);
+		return -1;
+	}
+	
+	//<check the header>
+	
+	//leggere 2 byte compression+total length
+	//bit_read (length-1-sizeof (int))*8      #of bit
+	
+	
+	//<if (compressed)>
+	//		decode(bitr)
+	//else
+	// 		extract from bitr
+
+	return 0;
+}
+
+
+

@@ -5,6 +5,8 @@ and functions to decompress*/
 #include <errno.h>
 #include <stdint.h>
 
+#include "bitio.h"
+
 /*array whose entries contain the symbols
   it is of type <label, symbol> where label=index+1 as the root (EOF) has not to be stored
 */
@@ -36,13 +38,15 @@ int dictionary_size; 	//max number of element in the array
 int array_elem_counter;	//number of element in the hash table
 int actual_bits_counter;//number of bits for the current symbol
 char* decomp_buffer;
-
-
-
+struct bitio* my_bitio;
 
 //???int hash_elem_pointer;	//pointer to the actual node
 
 unsigned long hash(unsigned char*);
 
 //initialize all the stuff
-int array_create();
+int init_decomp(char*);
+
+//decode the file
+int decompress(char* input_file_name);
+
