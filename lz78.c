@@ -48,7 +48,6 @@ int main(int argc, char *argv []) {
     //compr is set to 1 if we want to compress, set to 2 if we want to decompress
     char* source=NULL, *dest=NULL;
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
-    struct bitio* fd_bitio = NULL;
     int opt;
 	FILE* file;
 	
@@ -178,12 +177,13 @@ int main(int argc, char *argv []) {
 			fprintf(stderr, "Error: file can't be opened in write mode\n");
 			exit(1);
 		}
-		fd_bitio = bit_open(source, 0);
-		if (fd_bitio == NULL){
-			fprintf(stderr, "Error: file can't be opened in read mode\n");
-			close(fd);
-			exit(1);
+		
+		//initialize all the data structure
+		ret = array_create();
+		if (ret < 0){
+			printf("Unable to perform the initialization phase.\n");
 		}
+		
 		//<check header>
 		//<call decompress function>
 		printf("Decompression completed.\n");

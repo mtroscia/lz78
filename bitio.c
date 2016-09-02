@@ -58,6 +58,8 @@ int bit_flush(struct bitio* b)
 		}
 		b->wp = 0;
 	}
+	
+	return ret;
 }
 
 int bit_close(struct bitio* b)

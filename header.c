@@ -1,5 +1,6 @@
 #include "header.h"
 
+
 int add_checksum(FILE* fd, int size, unsigned char** out) {	
 	int ret, ret_r, i;
 	SHA256_CTX* ctx;
