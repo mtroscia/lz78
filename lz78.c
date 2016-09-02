@@ -180,13 +180,13 @@ int main(int argc, char *argv []) {
 		
 		
 		//initialize all the data structure
-		ret = init_decomp(dest);
+		ret = init_decomp(source);
 		if (ret < 0){
 			printf("Unable to perform the initialization phase.\n");
 		}		
 		
 		//decode the file
-		ret = decompress(source);
+		ret = decompress(dest);
 		if (ret<0){
 			printf("Error in decompression\n");
 			return -1;
