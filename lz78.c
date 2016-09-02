@@ -10,6 +10,7 @@
 #include <fcntl.h>
 
 #define DICT_SIZE 65535
+#define LZ78 1
 
 void print_help()
 {
@@ -50,6 +51,7 @@ int main(int argc, char *argv []) {
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
     int opt;
 	FILE* file;
+	struct header* hd=NULL;
 	
 
     while ((opt = getopt(argc,argv,"cdi:o:s:h"))!=-1) {
@@ -122,7 +124,11 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		ret = add_header(my_bitio, file, source);
+		hd = generate_header(file, source, LZ78, dict_size);
+		if (hd == NULL) {
+			return -1;
+		}
+		ret = add_header(my_bitio, hd);
 		if (ret == -1) {
 			return -1;
 		}
@@ -168,9 +174,9 @@ int main(int argc, char *argv []) {
 		}
 		
 		//******************************************************************************/
-		print_content(dest);
+		//print_content(dest);
 		/******************************************************************************/
-		
+		free(hash_table);
 	} else if (compr==1){		//decompressing
 		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
 		if (fd < 0){
@@ -178,24 +184,19 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		
 		//initialize all the data structure
-		ret = init_decomp(source);
+		ret = array_create();
 		if (ret < 0){
 			printf("Unable to perform the initialization phase.\n");
-		}		
-		
-		//decode the file
-		ret = decompress(dest);
-		if (ret<0){
-			printf("Error in decompression\n");
-			return -1;
 		}
 		
+		//<check header>
+		//<call decompress function>
 		printf("Decompression completed.\n");
 	}
 
 	printf("End of main...\n");
 	
+		
 	return 0;
 }
