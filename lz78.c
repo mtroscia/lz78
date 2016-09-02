@@ -45,7 +45,7 @@ void print_content(char*dest)
 }
 
 int main(int argc, char *argv []) {
-    int fd, compr=-1,ret;// s=0, h=0;
+    int fd, compr=-1, ret;// s=0, h=0;
     //compr is set to 1 if we want to compress, set to 2 if we want to decompress
     char* source=NULL, *dest=NULL;
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
@@ -126,11 +126,11 @@ int main(int argc, char *argv []) {
 		
 		hd = generate_header(file, source, LZ78, dict_size);
 		if (hd == NULL) {
-			return -1;
+			exit(1);
 		}
 		ret = add_header(my_bitio, hd);
 		if (ret == -1) {
-			return -1;
+			exit(1);
 		}
 		
 		//initialize the hash table
@@ -138,7 +138,7 @@ int main(int argc, char *argv []) {
 		if (ret == -1)
 		{
 			printf("Unable to create the hash table\n");
-			return -1;
+			exit(1);
 		}
 		
 		//call the compression algorithm
@@ -147,7 +147,7 @@ int main(int argc, char *argv []) {
 		{
 			printf("Unable to perform the compression\n");
 			free(hash_table);
-			return -1;
+			exit(1);
 		}
 		
 		ret = bit_flush(my_bitio);
@@ -185,13 +185,29 @@ int main(int argc, char *argv []) {
 		}
 		
 		//initialize all the data structure
-		ret = array_create();
+		ret = init_decomp(source);
 		if (ret < 0){
 			printf("Unable to perform the initialization phase.\n");
+			exit(1);
 		}
 		
-		//<check header>
-		//<call decompress function>
+		/*hd = get_header(my_bitio);
+		if (hd == NULL) {
+			exit(1);
+		}*/
+		
+		//decode
+		ret = decompress(dest);
+		if (ret<0){
+			printf("Error in decompression\n");
+			exit(1);
+		}
+		
+		/*ret = check_integrity(hd, dest); <---- dest but maybe better the pointer to the file??!?
+		if (ret == -1) {
+			exit(1);
+		}*/
+		
 		printf("Decompression completed.\n");
 	}
 
