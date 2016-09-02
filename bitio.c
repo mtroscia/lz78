@@ -19,7 +19,7 @@ struct bitio* bit_open(const char* name, uint32_t mode)
 		return NULL;			
 	}
 
-	b=calloc(1,sizeof(struct bitio));
+	b=calloc(1, sizeof(struct bitio));
 	if(b==NULL){
 		errno=ENOMEM;
 		return NULL;	
@@ -35,7 +35,7 @@ struct bitio* bit_open(const char* name, uint32_t mode)
 	
 	b->mode=mode;
 	
-	/************************si potrebbero omettere*********/
+	/************************can be removed*****************/
 	//b->wp=0;
 	//b->rp=0;
 	/*******************************************************/
@@ -114,7 +114,7 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 	*data=0;		//clear all bits of data buffer
 	space=(int)(b->wp)-(int)(b->rp);
 	if(size==0){
-		return 0; // no more bits to read	
+		return 0; //no more bits to read	
 	}
 	
 	if(size<=space){
@@ -150,7 +150,7 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 		else{
 			*data|=b->data<<space;
 			*data&=(1UL<<(b->wp+space))-1;
-			b->rp=b->wp;//all buffer has been read
+			b->rp=b->wp;	//all buffer has been read
 			return space+b->wp;		
 		}
 	}
