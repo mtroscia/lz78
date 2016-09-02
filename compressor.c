@@ -200,6 +200,8 @@ void print_hash_table(){
 		fprintf(f, "%i)father_index: %i\tcharacter: %c\tchild_index: %i\n", i,
 				hash_table[i].father_index, hash_table[i].character, hash_table[i].child_index);
 	}
+	
+	fclose(f);
 }	
 /******************************************************************************************************************/
 
