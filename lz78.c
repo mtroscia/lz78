@@ -13,12 +13,12 @@
 
 void print_help()
 {
-    printf("Usage:\n\
-			lz78 -c -i <input_file> -o <output_file> for compression\n\
-			lz78 -d -i <input_file> -o <output_file> for decompression\n\n\
-			Other options:\n\
-			-s <dictionary_size>\n\
-			-h \thelp\n\n");
+    printf("Usage:\n");
+	printf("lz78 -c -i <input_file> -o <output_file> for compression\n");
+	printf("lz78 -d -i <input_file> -o <output_file> for decompression\n\n");
+	printf("Other options:\n");
+	printf("-s <dictionary_size>\n");
+	printf("-h \thelp\n\n");
 }
 
 void print_content(char*dest)
@@ -39,6 +39,8 @@ void print_content(char*dest)
 		printf ("read: %llu ", data);
 		
 	}
+	
+	bit_close(my_bitio);
 }
 
 int main(int argc, char *argv []) {
@@ -102,7 +104,7 @@ int main(int argc, char *argv []) {
 		exit(1);
 	}
 
-	if (compr!=-1 && (source==NULL || dest==NULL)){		
+	if (compr!=-1 && (source==NULL || dest==NULL)){	
 		fprintf(stderr, "Error: you must always specify input and output files\n");
 		print_help();
 		exit(1);
@@ -119,20 +121,12 @@ int main(int argc, char *argv []) {
 			fprintf(stderr, "Error: file can't be opened in write mode\n");
 			fclose(file);
 			exit(1);
-		}	
+		}
 		
 		ret = add_header(my_bitio, file, source);
 		if (ret == -1) {
 			return -1;
 		}
-		
-		//open the bitio stream in write mode
-		/*my_bitio = bit_open(dest, 1);
-		if (my_bitio == NULL)
-		{
-			printf("Unable to open a bitio stream\n");
-			return -1;
-		}*/
 		
 		//initialize the hash table
 		ret = hash_table_create(dict_size);
@@ -151,7 +145,29 @@ int main(int argc, char *argv []) {
 			return -1;
 		}
 		
+		ret = bit_flush(my_bitio);
+		if (ret == -1){
+			fprintf(stderr, "Error: cannot flush the buffer\n");
+			fclose(file);
+			exit(1);
+		}
+		
 		printf("Compression completed.\n");
+		
+		//<choose between origin and compressed>
+		
+		//if(!<compressed>)
+		//	<open new file>
+		//	<add header for origin>
+		//	<append origin file>
+
+		ret = bit_close(my_bitio);
+		if (ret == -1){
+			fprintf(stderr, "Error: cannot flush the buffer\n");
+			fclose(file);
+			exit(1);
+		}
+		
 		//******************************************************************************/
 		print_content(dest);
 		/******************************************************************************/
@@ -174,7 +190,6 @@ int main(int argc, char *argv []) {
 	}
 
 	printf("End of main...\n");
-	
 	
 		
 	return 0;
