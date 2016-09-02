@@ -170,7 +170,7 @@ int main(int argc, char *argv []) {
 		//******************************************************************************/
 		print_content(dest);
 		/******************************************************************************/
-		free(hash_table);
+		
 	} else if (compr==1){		//decompressing
 		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
 		if (fd < 0){
@@ -178,19 +178,24 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
+		
 		//initialize all the data structure
-		ret = array_create();
+		ret = init_decomp(dest);
 		if (ret < 0){
 			printf("Unable to perform the initialization phase.\n");
+		}		
+		
+		//decode the file
+		ret = decompress(source);
+		if (ret<0){
+			printf("Error in decompression\n");
+			return -1;
 		}
 		
-		//<check header>
-		//<call decompress function>
 		printf("Decompression completed.\n");
 	}
 
 	printf("End of main...\n");
 	
-		
 	return 0;
 }

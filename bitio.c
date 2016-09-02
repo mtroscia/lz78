@@ -35,11 +35,6 @@ struct bitio* bit_open(const char* name, uint32_t mode)
 	
 	b->mode=mode;
 	
-	/************************can be removed*****************/
-	//b->wp=0;
-	//b->rp=0;
-	/*******************************************************/
-	
 	return b;
 }
 
