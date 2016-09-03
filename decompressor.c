@@ -22,8 +22,8 @@ int array_add(uint32_t father_index, char character)
 	dictionary[array_elem_counter].father_index =father_index;
 	dictionary[array_elem_counter].character =character;
 	
-	printf ("Added child:%i - father:%i - character:%c\n", array_elem_counter,
-		     dictionary[array_elem_counter].father_index, dictionary[array_elem_counter].character);
+	//printf ("Added child:%i - father:%i - character:%c\n", array_elem_counter,
+		     //dictionary[array_elem_counter].father_index, dictionary[array_elem_counter].character);
 	
 	/************************************ONLY FOR TESTING PURPOSES******************************************************/
 		//print_hash_table();
@@ -45,7 +45,7 @@ int array_init(){
 	for (i=0; i<=255; i++)
 	{
 		c=i;
-		printf("Added %c\n", c);
+		//printf("Added %c\n", c);
 		
 		ret = array_add(0, c);
 		if (ret!=0){
@@ -53,7 +53,7 @@ int array_init(){
 			return -1;
 		}
 		
-		printf ("Actual array_elem_counter = %i\n", array_elem_counter);
+		//printf ("Actual array_elem_counter = %i\n", array_elem_counter);
 		
 	}
 	
@@ -85,7 +85,7 @@ int init_decomp(char* source_file_name)
 {	
 	int ret;
 	
-	decomp_buffer=calloc (8, sizeof (char)); 
+	decomp_buffer=calloc(8, sizeof (char)); 
 	
 	/**************************************change 10000 with the dict_size value included in the header****/
 	dictionary_size=10000;
@@ -101,17 +101,9 @@ int init_decomp(char* source_file_name)
 	{
 		printf ("Error in array_init");
 	}
-	
-	my_bitio=bit_open(source_file_name, 0);
-	if (my_bitio==NULL){
-		printf ("Error in bit_open()\n");
-		free (dictionary);
-		return -1;
-	}
-	
 	return 0;
+	
 }
-
 
 int extend_buffer()
 {
@@ -152,7 +144,7 @@ int emit_symbols(FILE* f)
 		j--;
 	}
  
-	printf ("string : %s\n", decomp_buffer);
+	//printf ("string : %s\n", decomp_buffer);
 	
 	//for (i=0; i<hash_table_size; i++)
 	{
@@ -187,7 +179,7 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 			
 			if(ret < 0)
 			{
-				printf ("unable to extend the decompression buffer\n");
+				printf ("Unable to extend the decompression buffer\n");
 				return -1;
 			}
 		} 
@@ -197,7 +189,7 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 	 //at the first step we don't have any node with unknown character value
         if (unknown_node != 0)
 	{
-            printf("update the unknown node%i: %c\n",array_elem_counter-1,character);
+            //printf("Update the unknown node%i: %c\n",array_elem_counter-1,character);
             // there is a child node with an unknown character (it is the last one!)
             dictionary[array_elem_counter-1].character = character;
 	}
@@ -215,10 +207,10 @@ int decode(FILE* f)
 	
 	unknown_node=0;
 	
-	printf ("\n\nIn decode\n");
+	printf ("\nIn decode\n");
 	while (1)
 	{
-		ret=bit_read(my_bitio, actual_bits_counter, &node_index);
+		ret=bit_read(my_bitio_d, actual_bits_counter, &node_index);
 		if (ret<0)
 		{
 			printf ("Error in read bit");
@@ -234,9 +226,9 @@ int decode(FILE* f)
 		}
 		
 		//add an unknown node
-		ret = array_add (node_index, '?');
+		ret = array_add(node_index, '?');
 		
-                //brows the tree
+        //brows the tree
 		ret = find_path(node_index, unknown_node, f);
 		
 		unknown_node=1;

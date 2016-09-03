@@ -38,7 +38,8 @@ int dictionary_size; 	//max number of element in the array
 int array_elem_counter;	//number of element in the hash table
 int actual_bits_counter;//number of bits for the current symbol
 char* decomp_buffer;
-struct bitio* my_bitio;
+
+struct bitio* my_bitio_d;
 
 //???int hash_elem_pointer;	//pointer to the actual node
 

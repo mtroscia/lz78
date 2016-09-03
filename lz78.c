@@ -22,16 +22,16 @@ void print_help()
 	printf("-h \thelp\n\n");
 }
 
-void print_content(char*dest)
+void print_content(char* dest)
 {
-	my_bitio=bit_open(dest, 0);
+	my_bitio_c=bit_open(dest, 0);
 	uint64_t data;
 	int ret;
 	
 	ret=0;
 	while (1)
 	{
-		ret=bit_read(my_bitio, 9, &data);
+		ret=bit_read(my_bitio_c, 9, &data);
 		if (ret<0)
 		{
 			break;
@@ -41,7 +41,7 @@ void print_content(char*dest)
 		
 	}
 	
-	bit_close(my_bitio);
+	bit_close(my_bitio_c);
 }
 
 int main(int argc, char *argv []) {
@@ -52,7 +52,6 @@ int main(int argc, char *argv []) {
     int opt;
 	FILE* file;
 	struct header* hd=NULL;
-	
 
     while ((opt = getopt(argc,argv,"cdi:o:s:h"))!=-1) {
         switch (opt) {
@@ -117,23 +116,21 @@ int main(int argc, char *argv []) {
 			fprintf(stderr, "Error: file can't be opened in read mode\n");
 			exit(1);
 		}
-		my_bitio = bit_open(dest, 1);
-		if (my_bitio == NULL){
+		my_bitio_c = bit_open(dest, 1);
+		if (my_bitio_c == NULL){
 			fprintf(stderr, "Error: file can't be opened in write mode\n");
 			fclose(file);
 			exit(1);
 		}
 		
-		/********************* per testare il decompressore commentare qui*******************/
 		hd = generate_header(file, source, LZ78, dict_size);
 		if (hd == NULL) {
 			exit(1);
 		}
-		ret = add_header(my_bitio, hd);
+		ret = add_header(my_bitio_c, hd);
 		if (ret == -1) {
 			exit(1);
 		}
-		/*******************************************************************************************/
 		
 		//initialize the hash table
 		ret = hash_table_create(dict_size);
@@ -144,7 +141,7 @@ int main(int argc, char *argv []) {
 		}
 		
 		//call the compression algorithm
-		ret = compress (source);
+		ret = compress(source);
 		if (ret == -1)
 		{
 			printf("Unable to perform the compression\n");
@@ -152,7 +149,7 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		ret = bit_flush(my_bitio);
+		ret = bit_flush(my_bitio_c);
 		if (ret == -1){
 			fprintf(stderr, "Error: cannot flush the buffer\n");
 			fclose(file);
@@ -168,7 +165,7 @@ int main(int argc, char *argv []) {
 		//	<add header for origin>
 		//	<append origin file>
 
-		ret = bit_close(my_bitio);
+		ret = bit_close(my_bitio_c);
 		if (ret == -1){
 			fprintf(stderr, "Error: cannot flush the buffer\n");
 			fclose(file);
@@ -176,7 +173,7 @@ int main(int argc, char *argv []) {
 		}
 		
 		//******************************************************************************/
-		print_content(dest);
+		//print_content(dest);
 		/******************************************************************************/
 		//free(hash_table);
 	} else if (compr==1){		//decompressing
@@ -193,10 +190,17 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		/*hd = get_header(my_bitio);
+		my_bitio_d = bit_open(source, 0);
+		if (my_bitio_d == NULL){
+			printf ("Error in bit_open()\n");
+			free (dictionary);
+			return -1;
+		}
+		
+		hd = get_header(my_bitio_d);
 		if (hd == NULL) {
 			exit(1);
-		}*/
+		}
 		
 		//decode
 		ret = decompress(dest);
@@ -205,16 +209,13 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		/*ret = check_integrity(hd, my_bitio->f); 
+		ret = check_integrity(hd, get_file_pointer(my_bitio_d)); 
 		if (ret == -1) {
 			exit(1);
-		}*/
+		}
 		
 		printf("Decompression completed.\n");
 	}
-
-	printf("End of main...\n");
-	
 		
 	return 0;
 }
