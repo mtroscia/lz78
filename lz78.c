@@ -10,6 +10,7 @@
 #include <fcntl.h>
 
 #define DICT_SIZE 65535
+#define LZ78 1
 
 void print_help()
 {
@@ -44,12 +45,13 @@ void print_content(char*dest)
 }
 
 int main(int argc, char *argv []) {
-    int fd, compr=-1,ret;// s=0, h=0;
+    int fd, compr=-1, ret;// s=0, h=0;
     //compr is set to 1 if we want to compress, set to 2 if we want to decompress
     char* source=NULL, *dest=NULL;
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
     int opt;
 	FILE* file;
+	struct header* hd=NULL;
 	
 
     while ((opt = getopt(argc,argv,"cdi:o:s:h"))!=-1) {
@@ -122,9 +124,13 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		ret = add_header(my_bitio, file, source);
+		hd = generate_header(file, source, LZ78, dict_size);
+		if (hd == NULL) {
+			exit(1);
+		}
+		ret = add_header(my_bitio, hd);
 		if (ret == -1) {
-			return -1;
+			exit(1);
 		}
 		
 		//initialize the hash table
@@ -132,7 +138,7 @@ int main(int argc, char *argv []) {
 		if (ret == -1)
 		{
 			printf("Unable to create the hash table\n");
-			return -1;
+			exit(1);
 		}
 		
 		//call the compression algorithm
@@ -141,7 +147,7 @@ int main(int argc, char *argv []) {
 		{
 			printf("Unable to perform the compression\n");
 			free(hash_table);
-			return -1;
+			exit(1);
 		}
 		
 		ret = bit_flush(my_bitio);
@@ -168,9 +174,9 @@ int main(int argc, char *argv []) {
 		}
 		
 		//******************************************************************************/
-		print_content(dest);
+		//print_content(dest);
 		/******************************************************************************/
-		
+		//free(hash_table);
 	} else if (compr==1){		//decompressing
 		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
 		if (fd < 0){
@@ -178,24 +184,35 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		
 		//initialize all the data structure
 		ret = init_decomp(source);
 		if (ret < 0){
 			printf("Unable to perform the initialization phase.\n");
-		}		
+			exit(1);
+		}
 		
-		//decode the file
+		/*hd = get_header(my_bitio);
+		if (hd == NULL) {
+			exit(1);
+		}*/
+		
+		//decode
 		ret = decompress(dest);
 		if (ret<0){
 			printf("Error in decompression\n");
-			return -1;
+			exit(1);
 		}
+		
+		/*ret = check_integrity(hd, my_bitio->f); 
+		if (ret == -1) {
+			exit(1);
+		}*/
 		
 		printf("Decompression completed.\n");
 	}
 
 	printf("End of main...\n");
 	
+		
 	return 0;
 }
