@@ -124,6 +124,7 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
+		/********************* per testare il decompressore commentare qui*******************/
 		hd = generate_header(file, source, LZ78, dict_size);
 		if (hd == NULL) {
 			exit(1);
@@ -132,6 +133,7 @@ int main(int argc, char *argv []) {
 		if (ret == -1) {
 			exit(1);
 		}
+		/*******************************************************************************************/
 		
 		//initialize the hash table
 		ret = hash_table_create(dict_size);
@@ -174,7 +176,7 @@ int main(int argc, char *argv []) {
 		}
 		
 		//******************************************************************************/
-		//print_content(dest);
+		print_content(dest);
 		/******************************************************************************/
 		//free(hash_table);
 	} else if (compr==1){		//decompressing
