@@ -124,15 +124,16 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*hd = generate_header(file, source, LZ78, dict_size);
+		/********************* per testare il decompressore commentare qui*******************/
+		hd = generate_header(file, source, LZ78, dict_size);
 		if (hd == NULL) {
 			exit(1);
 		}
 		ret = add_header(my_bitio, hd);
 		if (ret == -1) {
 			exit(1);
-		}*/
+		}
+		/*******************************************************************************************/
 		
 		//initialize the hash table
 		ret = hash_table_create(dict_size);
