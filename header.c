@@ -14,7 +14,7 @@ void print_bytes(const void* object, size_t size){
 int create_checksum(FILE* fd, int size, unsigned char** out) {	
 	int ret, ret_r, i;
 	SHA256_CTX* ctx;
-	int buf_size = 128;
+	int buf_size = 256;
 	void* in = malloc(buf_size);
 	int num_blocks = size/buf_size + 1;
 	
@@ -24,33 +24,24 @@ int create_checksum(FILE* fd, int size, unsigned char** out) {
 	
 	ret = SHA256_Init(ctx);
 	if (ret != 1) {
-		printf("\nError in initializing the context...\n");
+		printf("Error in initializing the context...\n");
 		return -1;
 	}
 	
 	for (i=0; i<num_blocks; i++) {
-		if (i != num_blocks-1) {
-			ret_r = fread(in, buf_size, 1, fd);
-			if (ret_r < 0) {
-				return -1;
-			}
-			ret = SHA256_Update(ctx, in, ret_r);
-			if (ret == 0) {
-				return -1;
-			}
-		} else {
-			ret_r = fread(in, buf_size, 1, fd);
-			if (ret_r < 0) {
-				return -1;
-			}
-			ret = SHA256_Update(ctx, in, ret_r);
-			if (ret == 0) {
-				return -1;
-			}
+		ret_r = fread(in, 1, buf_size, fd);
+		if (ret_r < 0) {
+			return -1;
+		}
+		ret = SHA256_Update(ctx, in, ret_r);
+		if (ret == 0) {
+			return -1;
 		}
 	}
+	
 	ret = SHA256_Final(*out, ctx); 
 	if (ret == 0) {
+		printf("Error in finalizing the context...\n");
 		return -1;
 	}
 	
