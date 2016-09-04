@@ -8,7 +8,7 @@ it contains useful info about the original and compressed file*/
 #include <openssl/sha.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <endian.h>
+#include "portable_endian.h"
 #include "bitio.h"
 
 struct header{
