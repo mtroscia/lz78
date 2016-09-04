@@ -121,9 +121,7 @@ unsigned long generate_hash_index (uint32_t father, char symbol){
 	//generate the string using symbol and father_index
 	sprintf((char*)buffer, "%c", symbol);
 	sprintf((char*)s, "%d", father);
-	strcat ((char*)buffer, s);
-	
-	
+	strcat ((char*)buffer, s);	
 	/*sprintf((char*)buffer, "%d", father);
 	sprintf(s, "%c", symbol);
 	strcat ((char*)buffer, s);*/
