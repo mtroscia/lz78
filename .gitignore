@@ -51,3 +51,6 @@ compressor
 out.txt
 *.exe
 *.txt
+*.plist
+
+lz78
