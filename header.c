@@ -254,7 +254,8 @@ int check_integrity(struct header* hd, FILE* file){
 	unsigned char* computed_checksum;
 	struct stat file_info;
 	uint64_t size;
-	int ret, fd;
+	int ret;
+	int fd;
 	
 	fd = fileno(file);
 	if (fd <= 0) {
