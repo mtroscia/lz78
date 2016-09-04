@@ -81,7 +81,7 @@ int array_reset(){
 
 
 //initialize decompression
-int init_decomp(char* source_file_name)
+int init_decomp()
 {	
 	int ret;
 	

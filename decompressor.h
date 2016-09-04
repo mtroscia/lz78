@@ -46,7 +46,7 @@ struct bitio* my_bitio_d;
 unsigned long hash(unsigned char*);
 
 //initialize all the stuff
-int init_decomp(char*);
+int init_decomp();
 
 //decode the file
 int decompress(char* input_file_name);
