@@ -54,6 +54,9 @@ int create_checksum(FILE* fd, int size, unsigned char** out) {
 		return -1;
 	}
 	
+	print_bytes(out, SHA256_DIGEST_LENGTH);
+	printf("\n");
+	
 	//printf("OK\n");
 	
 	return 0;
@@ -133,15 +136,15 @@ int add_header(struct bitio* my_bitio, struct header* hd) {
 	if (ret != 0) {
 		return -1;
 	}
-	//print_bytes(&hd->compressed, sizeof(uint8_t));
-	//printf("\n");
+	print_bytes(&hd->compressed, sizeof(uint8_t));
+	printf("\n");
 	
 	ret = bit_write(my_bitio, 8, (uint8_t)hd->orig_filename_len);
 	if (ret != 0) {
 		return -1;
 	}
-	//print_bytes(&hd->orig_filename_len, sizeof(uint8_t));
-	//printf("\n");
+	print_bytes(&hd->orig_filename_len, sizeof(uint8_t));
+	printf("\n");
 	
 	for (i=0; i<hd->orig_filename_len; i++) {
 		ret = bit_write(my_bitio, 8, (char)(hd->orig_filename[i]));
@@ -149,20 +152,20 @@ int add_header(struct bitio* my_bitio, struct header* hd) {
 			return -1;
 		}
 	}
-	//print_bytes(hd->orig_filename, hd->orig_filename_len);
-	//printf("\n");
+	print_bytes(hd->orig_filename, hd->orig_filename_len);
+	printf("\n");
 	
 	temp64 = htole64((uint64_t)hd->orig_size);
-	//print_bytes((void*)&temp64, sizeof(uint64_t));
-	//printf("\n");
+	print_bytes((void*)&temp64, sizeof(uint64_t));
+	printf("\n");
 	ret = bit_write(my_bitio, 64, temp64);
 	if (ret != 0) {
 		return -1;
 	}
 	
 	temp64 = htole64((uint64_t)hd->orig_creation_time);
-	//print_bytes((void*)&temp64, sizeof(uint64_t));
-	//printf("\n");
+	print_bytes((void*)&temp64, sizeof(uint64_t));
+	printf("\n");
 	ret = bit_write(my_bitio, 64, temp64);
 	if (ret != 0) {
 		return -1;
@@ -174,19 +177,19 @@ int add_header(struct bitio* my_bitio, struct header* hd) {
 			return -1;
 		}
 	}
-	//print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
-	//printf("\n");
+	print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
+	printf("\n");
 	
 	ret = bit_write(my_bitio, 8, (uint8_t)(hd->compr_alg));
 	if (ret != 0) {
 		return -1;
 	}
-	//print_bytes(&hd->compr_alg, sizeof(uint8_t));
-	//printf("\n");
+	print_bytes(&hd->compr_alg, sizeof(uint8_t));
+	printf("\n");
 	
 	temp32 = htole32((int)hd->dict_size);
-	//print_bytes((void*)&temp32, sizeof(int));
-	//printf("\n");
+	print_bytes((void*)&temp32, sizeof(int));
+	printf("\n");
 	ret = bit_write(my_bitio, 32, temp32);
 	if (ret != 0) {
 		return -1;
@@ -211,23 +214,23 @@ struct header* get_header(struct bitio* my_bitio){
 		return NULL;
 	}
 	
-	//printf("Start reading from input file...\n");
+	printf("Start reading from input file...\n");
 	
 	ret = bit_read(my_bitio, 8, &buf);
 	if (ret != 8) {
 		return NULL;
 	}
 	hd->compressed = (uint8_t)buf;
-	//print_bytes(&hd->compressed, sizeof(uint8_t));
-	//printf("\n");
+	print_bytes(&hd->compressed, sizeof(uint8_t));
+	printf("\n");
 	
 	ret = bit_read(my_bitio, 8, &buf);
 	if (ret != 8) {
 		return NULL;
 	}
 	hd->orig_filename_len = (uint8_t)buf;
-	//print_bytes(&hd->orig_filename_len, sizeof(uint8_t));
-	//printf("\n");
+	print_bytes(&hd->orig_filename_len, sizeof(uint8_t));
+	printf("\n");
 	
 	hd->orig_filename = malloc(hd->orig_filename_len+1);	//to consider /0
 	for (i=0; i<hd->orig_filename_len; i++) {
@@ -238,24 +241,24 @@ struct header* get_header(struct bitio* my_bitio){
 		hd->orig_filename[i] = (char)buf;
 	}
 	hd->orig_filename[hd->orig_filename_len] = '\0';
-	//print_bytes(hd->orig_filename, hd->orig_filename_len);
-	//printf("\n");
+	print_bytes(hd->orig_filename, hd->orig_filename_len);
+	printf("\n");
 	
 	ret = bit_read(my_bitio, 64, &buf);
 	if (ret != 64) {
 		return NULL;
 	}
 	hd->orig_size = le64toh(buf);
-	//print_bytes(&(hd->orig_size), sizeof(uint64_t));
-	//printf("\n");
+	print_bytes(&(hd->orig_size), sizeof(uint64_t));
+	printf("\n");
 
 	ret = bit_read(my_bitio, 64, &buf);
 	if (ret != 64) {
 		return NULL;
 	}
 	hd->orig_creation_time = le64toh(buf);
-	//print_bytes(&(hd->orig_creation_time), sizeof(uint64_t));
-	//printf("\n");
+	print_bytes(&(hd->orig_creation_time), sizeof(uint64_t));
+	printf("\n");
 	
 	for (i=0; i<SHA256_DIGEST_LENGTH; i++) {
 		ret = bit_read(my_bitio, 8, &buf);
@@ -264,24 +267,24 @@ struct header* get_header(struct bitio* my_bitio){
 		}
 		hd->checksum[i] = (unsigned char)buf;
 	}
-	//print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
-	//printf("\n");
+	print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
+	printf("\n");
 	
 	ret = bit_read(my_bitio, 8, &buf);
 	if (ret != 8) {
 		return NULL;
 	}
 	hd->compr_alg = (uint8_t)buf;
-	//print_bytes(&hd->compr_alg, sizeof(uint8_t));
-	//printf("\n");
+	print_bytes(&hd->compr_alg, sizeof(uint8_t));
+	printf("\n");
 	
 	ret = bit_read(my_bitio, sizeof(int)*8, &buf);
 	if (ret != sizeof(int)*8) {
 		return NULL;
 	}
 	hd->dict_size = le32toh((int)buf);
-	//print_bytes(&hd->dict_size, sizeof(int));
-	//printf("\n");
+	print_bytes(&hd->dict_size, sizeof(int));
+	printf("\n");
 	
 	printf("Header has been read\n");
 	
@@ -302,10 +305,10 @@ int check_integrity(struct header* hd, FILE* file){
 		return -1;
 	}
 	
-	if (strcmp(computed_checksum, hd->checksum) != 0){
-		printf("Checksum verification failed\n");
-		return -1;
-	}
+	if (memcmp(computed_checksum, hd->checksum, SHA256_DIGEST_LENGTH) != 0){
+	    printf("Checksum verification failed\n");
+	    return -1;
+	  }
 	
 	return 0;
 }

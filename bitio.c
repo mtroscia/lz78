@@ -86,7 +86,8 @@ int bit_write(struct bitio * b, uint32_t size, uint64_t data)
 	}
 	
 	space=64-(b->wp); //space available in the buffer
-	data&=(1UL<<size)-1; //pick the rightmost size bits
+	if(size < 64)
+		data&=(1UL<<size)-1; //pick the rightmost size bits
 
 	if(size<=space){
 		b->data|=data<<b->wp;	//copy the block into the buffer from wp on
@@ -95,7 +96,8 @@ int bit_write(struct bitio * b, uint32_t size, uint64_t data)
 	else{
 		/********************DIFFERENT FROM LESSON***************/
 		//data&=(1UL<<space)-1; 	//pick the rightmost space bits		
-		b->data|=data<<b->wp;	//copy the block into the buffer from wp on
+		if(b->wp < 64)
+			b->data|=data<<b->wp;	//copy the block into the buffer from wp on
 
 		if(fwrite((void*)&b->data, 1, 8, b->f)<=0){		//empty b->data
 			errno=ENOSPC;
@@ -126,13 +128,15 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 	}
 	
 	if(size<=space){
-		*data=((b->data)>>b->rp)&((1UL<<size)-1);
+		uint64_t mask = (size < 64)? ((1UL<<size)-1): ~0UL;
+		*data=((b->data)>>b->rp) & mask;
 		b->rp+=size;
 		return size;	
 	}
 	
 	else{
-		*data=(b->data>>(b->rp)); //no need to mask: pick all unread bits
+		if(b->rp < 64)
+			*data=(b->data>>(b->rp)); //no need to mask: pick all unread bits
 		int ret = fread(&(b->data), 1, 8, b->f);
 		if (ret<=0) {
 			errno=ENODATA;
@@ -154,7 +158,7 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 				*data&=(uint64_t)((1UL<<size)-1); //only if size<64, otherwise we go out of UL and we mask all
 
 			b->rp=size-space;
-			return size-space;
+			return size;
 		}
 		else{
 			*data|=b->data<<space;
