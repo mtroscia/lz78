@@ -18,17 +18,18 @@ unsigned long hash(unsigned char *str){
 		return hash;
 }
 
+
 int hash_table_create(uint64_t size){
 	int ret;
 	
 	dictionary_size = size;
-	hash_table_size = size+(size/2);
-	//printf("Dictionary_size = %i - hash_table_size = %i\n", dictionary_size, hash_table_size);
 	
-	/*********************************************************************************************************/
-	//hash_table = (struct hash_elem*)calloc(1, sizeof(struct hash_elem)*size);
+	//hash_table_size = size+(size/2);
+	//let's try a bigger expansion factor
+	hash_table_size = size*2;
+	
+	//allocate memory for the hash table
 	hash_table = (struct hash_elem*)calloc(hash_table_size, sizeof(struct hash_elem)); // it should be better
-	/*********************************************************************************************************/
 	
 	if(hash_table==NULL){
 		printf("Error: hash table has not been created.\n");
@@ -44,6 +45,7 @@ int hash_table_create(uint64_t size){
 	
 	return 0;
 }
+
 
 int hash_init(){
 	int i, ret;
@@ -62,16 +64,11 @@ int hash_init(){
 			printf("Error in hash_add\n");
 			return -1;
 		}
-		
-		//printf ("Actual hash_elem_counter = %i\n", hash_elem_counter);
-		
 	}
-	
-	//printf("Content of hash_table[0]:\tfather_index %i - character %c - child_index %i\n",
-			//hash_table[11598].father_index, hash_table[11598].character,hash_table[11598].child_index);
 	
 	return 0;
 }
+
 
 int hash_add (uint32_t father, char symbol, uint32_t child){
 	unsigned long index;
@@ -114,29 +111,34 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 	return 0;
 }
 
+
 unsigned long generate_hash_index (uint32_t father, char symbol){
 	unsigned char buffer[33];
-	char s[2];
+	char s[33];
 	
 	unsigned long index;
 	
-	//generate the string using father and symbol
-	sprintf((char*)buffer, "%d", father);
-	sprintf(s, "%c", symbol);
+	//generate the string using symbol and father_index
+	sprintf((char*)buffer, "%c", symbol);
+	sprintf((char*)s, "%d", father);
 	strcat ((char*)buffer, s);
+	
+	
+	/*sprintf((char*)buffer, "%d", father);
+	sprintf(s, "%c", symbol);
+	strcat ((char*)buffer, s);*/
+	
 	//compute hash for the string
 	index = hash(buffer);
 	//obtain an index from the hash
 	index %= hash_table_size;
-	
-	//printf("string: %s- hash index: %lu\n", buffer, index);
 	
 	return index;
 }
 
 
 /*************************************************************************
-The function searches a node in the hash table using father-char as a key.
+The function searches a node in the hash table using char-father_index as a key.
 If it finds the node, then it returns the index; otherwise it returns 0.
 **************************************************************************/
 uint32_t hash_search (uint32_t father, char symbol){
@@ -152,8 +154,6 @@ uint32_t hash_search (uint32_t father, char symbol){
 		{
 			//The wanted entry was found
 			not_found = 0;
-			//printf("%i %c found:\t child value=%i\n",hash_table[index].father_index,
-					//hash_table[index].character,hash_table[index].child_index );
 		}else
 		{
 			if (hash_table[index].child_index==0)
@@ -256,7 +256,6 @@ int compress (char* input_file_name)
 						free(hash_table);
 						return -1;
 					}					
-					//printf("<0>\n");
 					
 					//flush my_bitio_c stream
 					ret = bit_flush(my_bitio_c);
@@ -286,7 +285,6 @@ int compress (char* input_file_name)
 						free(hash_table);
 						return -1;
 					}
-					//printf("<%i>\n", hash_elem_pointer);
 					
 					//add the new node 
 					ret = hash_add(hash_elem_pointer, (char)c, ++hash_elem_counter);
