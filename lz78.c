@@ -208,8 +208,11 @@ int main(int argc, char *argv []) {
 			printf("Error in decompression\n");
 			exit(1);
 		}
+
+		close(fd);
+		file = fopen(dest, "r");
 		
-		ret = check_integrity(hd, get_file_pointer(my_bitio_d)); 
+		ret = check_integrity(hd, file); 
 		if (ret == -1) {
 			exit(1);
 		}
