@@ -305,10 +305,10 @@ int check_integrity(struct header* hd, FILE* file){
 		return -1;
 	}
 	
-	if (strcmp(computed_checksum, hd->checksum) != 0){
-		printf("Checksum verification failed\n");
-		return -1;
-	}
+	if (memcmp(computed_checksum, hd->checksum, SHA256_DIGEST_LENGTH) != 0){
+	    printf("Checksum verification failed\n");
+	    return -1;
+	  }
 	
 	return 0;
 }
