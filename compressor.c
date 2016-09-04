@@ -23,7 +23,7 @@ int hash_table_create(uint64_t size){
 	
 	dictionary_size = size;
 	hash_table_size = size+(size/2);
-	printf("Dictionary_size = %i - hash_table_size = %i\n", dictionary_size, hash_table_size);
+	//printf("Dictionary_size = %i - hash_table_size = %i\n", dictionary_size, hash_table_size);
 	
 	/*********************************************************************************************************/
 	//hash_table = (struct hash_elem*)calloc(1, sizeof(struct hash_elem)*size);
@@ -55,7 +55,7 @@ int hash_init(){
 	for (i=0; i<=255; i++)
 	{
 		c=i;
-		printf("Added %c\n", c);
+		//printf("Added %c\n", c);
 		
 		ret = hash_add(0, c, ++hash_elem_counter);
 		if (ret!=0){
@@ -63,12 +63,12 @@ int hash_init(){
 			return -1;
 		}
 		
-		printf ("Actual hash_elem_counter = %i\n", hash_elem_counter);
+		//printf ("Actual hash_elem_counter = %i\n", hash_elem_counter);
 		
 	}
 	
-	printf("Content of hash_table[0]:\tfather_index %i - character %c - child_index %i\n",
-			hash_table[11598].father_index, hash_table[11598].character,hash_table[11598].child_index);
+	//printf("Content of hash_table[0]:\tfather_index %i - character %c - child_index %i\n",
+			//hash_table[11598].father_index, hash_table[11598].character,hash_table[11598].child_index);
 	
 	return 0;
 }
@@ -152,8 +152,8 @@ uint32_t hash_search (uint32_t father, char symbol){
 		{
 			//The wanted entry was found
 			not_found = 0;
-			printf("%i %c found:\t child value=%i\n",hash_table[index].father_index,
-					hash_table[index].character,hash_table[index].child_index );
+			//printf("%i %c found:\t child value=%i\n",hash_table[index].father_index,
+					//hash_table[index].character,hash_table[index].child_index );
 		}else
 		{
 			if (hash_table[index].child_index==0)
@@ -209,7 +209,7 @@ int emit(uint64_t symbol)
 {
 	int ret;
 	
-	ret = bit_write(my_bitio, actual_bits_counter, symbol);
+	ret = bit_write(my_bitio_c, actual_bits_counter, symbol);
 	if (ret < 0)
 	{
 		printf("Unable to perform the bit_write\n");
@@ -224,17 +224,19 @@ int compress (char* input_file_name)
 	int ret, c;
 	FILE* input_file;
 	
+	printf("\nIn compress\n");
+	
 	input_file = fopen(input_file_name, "r");
 	
 	//read a character and perform the compression until EOF is found
 	while(1){
 		c = getc(input_file);
 		
-		printf("Character read: %c\n", c);
+		//printf("Character read: %c\n", c);
 		
 		again:	if (c==EOF)
 				{
-					printf("EOF reached\n");
+					//printf("EOF reached\n");
 					
 					//emit the last father_index
 					ret = emit((uint64_t)hash_elem_pointer);
@@ -244,7 +246,7 @@ int compress (char* input_file_name)
 						free(hash_table);
 						return -1;
 					}
-					printf("<%i>\n", hash_elem_pointer);
+					//printf("<%i>\n", hash_elem_pointer);
 					
 					//emit the EOF value
 					ret = emit((uint64_t)0);
@@ -254,10 +256,10 @@ int compress (char* input_file_name)
 						free(hash_table);
 						return -1;
 					}					
-					printf("<0>\n");
+					//printf("<0>\n");
 					
-					//flush my_bitio stream
-					ret = bit_flush(my_bitio);
+					//flush my_bitio_c stream
+					ret = bit_flush(my_bitio_c);
 					if (ret<0)
 					{
 						printf("Unable to flush the bitio stream\n");
@@ -284,7 +286,7 @@ int compress (char* input_file_name)
 						free(hash_table);
 						return -1;
 					}
-					printf("<%i>\n", hash_elem_pointer);
+					//printf("<%i>\n", hash_elem_pointer);
 					
 					//add the new node 
 					ret = hash_add(hash_elem_pointer, (char)c, ++hash_elem_counter);
