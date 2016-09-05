@@ -19,7 +19,7 @@ struct header{
 	char* orig_filename;
 	uint64_t orig_size;
 	uint64_t orig_creation_time; //w.r.t 01/01/1970
-	unsigned char checksum[SHA256_DIGEST_LENGTH];	//256/8
+	unsigned char checksum[SHA256_DIGEST_LENGTH];
 	
 	//compression information
 	uint8_t compr_alg;

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 int array_reset();
 
 int array_add(uint32_t father_index, char character)
@@ -56,6 +57,8 @@ int array_init(){
 	}
 	
 	return 0;
+	
+	
 }
 
 
@@ -76,15 +79,14 @@ int array_reset(){
 
 
 //initialize decompression
-int init_decomp()
+int init_decomp(uint64_t dict_size)
 {	
 	int ret;
 	
 	decomp_buffer=calloc(8, sizeof (char)); 
 	
-	/**************************************change 10000 with the dict_size value included in the header****/
 	dictionary_size=10000;
-	/**************************************************************************************************/
+	
 	dictionary=calloc(dictionary_size, sizeof (struct array_elem)); //10000 =dict size 
 	if (dictionary ==NULL){
 		printf("unable to create a valid tree for the decompression phase.\n");
@@ -96,8 +98,8 @@ int init_decomp()
 	{
 		printf ("Error in array_init");
 	}
-	return 0;
 	
+	return 0;
 }
 
 int extend_buffer()
