@@ -257,6 +257,9 @@ int check_integrity(struct header* hd, FILE* file){
 	int ret;
 	int fd;
 	
+	if (file == NULL)
+		printf("file is NULL\n");
+	
 	fd = fileno(file);
 	if (fd <= 0) {
 		printf("Error in fd...\n");
