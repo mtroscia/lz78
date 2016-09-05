@@ -37,7 +37,7 @@ void print_content(char* dest)
 			break;
 		}
 		
-		printf ("read: %llu ", data);
+		printf ("read: %lu ", data);
 		
 	}
 	
@@ -183,18 +183,18 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		//initialize all the data structure
-		ret = init_decomp(source);
-		if (ret < 0){
-			printf("Unable to perform the initialization phase.\n");
-			exit(1);
-		}
-		
 		my_bitio_d = bit_open(source, 0);
 		if (my_bitio_d == NULL){
 			printf ("Error in bit_open()\n");
 			free (dictionary);
 			return -1;
+		}
+		
+		//initialize all the data structure
+		ret = init_decomp();
+		if (ret < 0){
+			printf("Unable to perform the initialization phase.\n");
+			exit(1);
 		}
 		
 		hd = get_header(my_bitio_d);
@@ -208,8 +208,11 @@ int main(int argc, char *argv []) {
 			printf("Error in decompression\n");
 			exit(1);
 		}
+
+		close(fd);
+		file = fopen(dest, "r");
 		
-		ret = check_integrity(hd, get_file_pointer(my_bitio_d)); 
+		ret = check_integrity(hd, file); 
 		if (ret == -1) {
 			exit(1);
 		}

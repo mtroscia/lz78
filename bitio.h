@@ -11,4 +11,3 @@ int bit_flush (struct bitio* );
 int bit_close (struct bitio* );
 int bit_write (struct bitio*, uint32_t size, uint64_t data);
 int bit_read (struct bitio*, uint32_t size, uint64_t* data);
-FILE* get_file_pointer(struct bitio* );
