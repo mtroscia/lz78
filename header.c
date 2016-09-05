@@ -73,7 +73,7 @@ void print_header(struct header* hd){
 struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_size){
 	struct header* hd;
 	struct stat file_info;
-	int ret, i;
+	int ret;
 	unsigned char* out;
 	
 	hd = (struct header*)calloc(1, sizeof(struct header));
@@ -175,7 +175,7 @@ int add_header(struct bitio* my_bitio, struct header* hd) {
 
 struct header* get_header(struct bitio* my_bitio){
 	int ret, i;
-	uint64_t buf = 0, temp;
+	uint64_t buf = 0;
 	struct header* hd;
 	
 	if (my_bitio==NULL) {
