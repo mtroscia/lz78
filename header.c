@@ -254,11 +254,14 @@ int check_integrity(struct header* hd, FILE* file){
 	uint64_t size;
 	int ret, fd;
 	
+<<<<<<< HEAD
 	if (hd == NULL || file == NULL) {
 		printf("One of the passed parameters is NULL\n");
 		return -1;
 	}
 	
+=======
+>>>>>>> parent of 82228c1... Merge branch 'master' into gionatan
 	fd = fileno(file);
 	if (fd <= 0) {
 		printf("Error in fd...\n");
