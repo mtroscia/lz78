@@ -142,9 +142,9 @@ int hash_table_create(uint64_t size){
 		return -1;
 	}
 	
+	
 	return 0;
 }
-
 
 
 /*************************************************************************
@@ -206,7 +206,7 @@ int emit(uint64_t symbol)
 {
 	int ret;
 	
-	printf("<%lu>\n", symbol);
+
 	ret = bit_write(my_bitio_c, actual_bits_counter, symbol);
 	if (ret < 0)
 	{
@@ -256,13 +256,16 @@ int compress (char* input_file_name)
 					}					
 					
 					//flush my_bitio_c stream
-					/*ret = bit_flush(my_bitio_c);
+					/**************************************************************/
+					ret = bit_flush(my_bitio_c);
 					if (ret<0)
 					{
 						printf("Unable to flush the bitio stream\n");
 						free(hash_table);
 						return -1;
-					}*/
+					}
+					/****************************************************************/
+					
 					break;
 				}
 			

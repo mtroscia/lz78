@@ -185,17 +185,19 @@ int main(int argc, char *argv []) {
 			return -1;
 		}
 		
+		hd = get_header(my_bitio_d);
+		if (hd == NULL) {
+			exit(1);
+		}
+		
 		//initialize all the data structure
-		ret = init_decomp();
+		ret = init_decomp(hd->orig_size);
 		if (ret < 0){
 			printf("Unable to perform the initialization phase.\n");
 			exit(1);
 		}
 		
-		hd = get_header(my_bitio_d);
-		if (hd == NULL) {
-			exit(1);
-		}
+		
 		
 		//decode
 		ret = decompress(dest);

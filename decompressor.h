@@ -22,7 +22,7 @@ unsigned long hash(unsigned char*);
 
 
 //initialize all the stuff
-int init_decomp();
+int init_decomp(uint64_t);
 
 //perform the decompression phase
-int decompress(char* input_file_name);
+int decompress(char*);
