@@ -46,11 +46,11 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-
-compressor
-out.txt
+lz78
 *.exe
 *.txt
 *.plist
-
-lz78
+compressor
+*.txt
+out.txt
+*.txt

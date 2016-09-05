@@ -33,21 +33,17 @@ struct array_elem{
 	uint8_t character;
 };
 
+struct bitio* my_bitio_d;
 struct array_elem* dictionary;
 int dictionary_size; 	//max number of element in the array
 int array_elem_counter;	//number of element in the hash table
 int actual_bits_counter;//number of bits for the current symbol
 char* decomp_buffer;
-
-struct bitio* my_bitio_d;
-
-//???int hash_elem_pointer;	//pointer to the actual node
-
 unsigned long hash(unsigned char*);
+
 
 //initialize all the stuff
 int init_decomp();
 
-//decode the file
+//perform the decompression phase
 int decompress(char* input_file_name);
-
