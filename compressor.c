@@ -51,6 +51,7 @@ int hash_init(){
 	int i, ret;
 	char c;
 	
+	hash_elem_counter=0;
 	actual_bits_counter=9;
 	
 	//add all ASCII characters
@@ -75,7 +76,10 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 	int collision;
 	
 	if (child > dictionary_size)
+	{
 		hash_reset();
+		child=hash_elem_counter;
+	}
 	
 	//eventually update the number of bits for the symbols
 	if((1<<actual_bits_counter)==hash_elem_counter+1) 
@@ -98,16 +102,17 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 		}
 		else
 		{
-			printf("Collision for index %lu! -> Check the next entry\n", index);
+			//printf("Collision for index %lu! -> Check the next entry\n", index);
 			//Hash table treated as a circular array
 			index = (index+1)%hash_table_size;
 		}
 	}
 	
 	/************************************ONLY FOR TESTING PURPOSES******************************************************/
-		print_hash_table();
+		//print_hash_table();
 	/******************************************************************************************************************/
 	
+	//printf("counter:%i\n", hash_elem_counter);
 	return 0;
 }
 
@@ -178,6 +183,7 @@ int hash_reset(){
 			printf("Error when reinitializing the hash table");
 			return -1;
 	}
+	printf("reset\n");
 	return 0;	
 }
 

@@ -11,7 +11,7 @@ int array_add(uint32_t father_index, char character)
 {	
 	array_elem_counter++;
 	
-	if (array_elem_counter == dictionary_size)
+	if (array_elem_counter > dictionary_size)
 		array_reset();
 	
 	//eventually update the number of bits for the symbols
@@ -22,13 +22,6 @@ int array_add(uint32_t father_index, char character)
 	dictionary[array_elem_counter].father_index =father_index;
 	dictionary[array_elem_counter].character =character;
 	
-	//printf ("Added child:%i - father:%i - character:%c\n", array_elem_counter,
-		     //dictionary[array_elem_counter].father_index, dictionary[array_elem_counter].character);
-	
-	/************************************ONLY FOR TESTING PURPOSES******************************************************/
-		//print_hash_table();
-	/******************************************************************************************************************/
-	
 	return 0;
 }
 
@@ -37,6 +30,7 @@ int array_init(){
 	int i, ret;
 	char c;
 	
+	array_elem_counter=0;
 	//initially we have 257 element
 	actual_bits_counter=9;
 	
