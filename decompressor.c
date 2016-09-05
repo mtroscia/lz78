@@ -11,7 +11,7 @@ int array_add(uint32_t father_index, char character)
 {	
 	array_elem_counter++;
 	
-	if (array_elem_counter > dictionary_size)
+	if (array_elem_counter == dictionary_size)
 		array_reset();
 	
 	//eventually update the number of bits for the symbols
