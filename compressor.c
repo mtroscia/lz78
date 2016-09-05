@@ -78,7 +78,7 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 	unsigned long index;
 	int collision;
 	
-	if (child > dictionary_size)
+	if (child == dictionary_size)
 	{
 		hash_reset();
 		child=hash_elem_counter;

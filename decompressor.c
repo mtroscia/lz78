@@ -12,8 +12,12 @@ int array_add(uint32_t father_index, char character)
 {	
 	array_elem_counter++;
 	
-	if (array_elem_counter > dictionary_size)
+	if (array_elem_counter == dictionary_size)
+	{
 		array_reset();
+		//++array_elem_counter;
+		//unknown_node=0;
+	}
 	
 	//eventually update the number of bits for the symbols
 	if((1<<actual_bits_counter)==array_elem_counter+1) 
@@ -200,9 +204,8 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 int decode(FILE* f)
 {
 	uint64_t node_index;
-	int ret, unknown_node;
+	int ret;
 	
-	unknown_node=0;
 	
 	printf ("\nIn decode\n");
 	while (1)
