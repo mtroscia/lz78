@@ -22,6 +22,9 @@ unsigned long hash(unsigned char*);
 
 
 //initialize all the stuff
+//int init_decomp(char*);
+
+//initialize all the stuff
 int init_decomp(uint64_t);
 
 //perform the decompression phase

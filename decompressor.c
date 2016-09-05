@@ -78,6 +78,7 @@ int array_reset(){
 
 
 //initialize decompression
+
 int init_decomp(uint64_t dict_size)
 {	
 	int ret;

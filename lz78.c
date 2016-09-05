@@ -37,7 +37,7 @@ void print_content(char* dest)
 			break;
 		}
 		
-		printf ("read: %lu ", data);
+		printf ("read: %llu ", data);
 		
 	}
 	
@@ -177,11 +177,11 @@ int main(int argc, char *argv []) {
 		/******************************************************************************/
 		//free(hash_table);
 	} else if (compr==1){		//decompressing
-		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
+		/*fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
 		if (fd < 0){
 			fprintf(stderr, "Error: file can't be opened in write mode\n");
 			exit(1);
-		}
+		}*/
 		
 		my_bitio_d = bit_open(source, 0);
 		if (my_bitio_d == NULL){
@@ -194,15 +194,13 @@ int main(int argc, char *argv []) {
 		if (hd == NULL) {
 			exit(1);
 		}
-		
+
 		//initialize all the data structure
-		ret = init_decomp(hd->orig_size);
+		ret = init_decomp(hd->dict_size);
 		if (ret < 0){
 			printf("Unable to perform the initialization phase.\n");
 			exit(1);
 		}
-		
-		
 		
 		//decode
 		ret = decompress(dest);
@@ -210,11 +208,8 @@ int main(int argc, char *argv []) {
 			printf("Error in decompression\n");
 			exit(1);
 		}
-
-		close(fd);
-		file = fopen(dest, "r");
 		
-		ret = check_integrity(hd, file); 
+		ret = check_integrity(hd, get_file_pointer(my_bitio_d)); 
 		if (ret == -1) {
 			exit(1);
 		}
