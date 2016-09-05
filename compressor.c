@@ -18,6 +18,26 @@ unsigned long hash(unsigned char *str){
 }
 
 
+unsigned long generate_hash_index (uint32_t father, char symbol){
+	unsigned char buffer[33];
+	char s[33];
+	
+	unsigned long index;
+	
+	//generate the string using symbol and father_index
+	sprintf((char*)buffer, "%c", symbol);
+	sprintf((char*)s, "%d", father);
+	strcat ((char*)buffer, s);	
+	
+	//compute hash for the string
+	index = hash(buffer);
+	//obtain an index from the hash
+	index %= hash_table_size;
+	
+	return index;
+}
+
+
 int hash_add (uint32_t father, char symbol, uint32_t child){
 	unsigned long index;
 	int collision;
@@ -104,18 +124,17 @@ int hash_table_create(uint64_t size){
 	
 	dictionary_size = size;
 	
-	//hash_table_size = size+(size/2);
-	//let's try a bigger expansion factor
+	//the hash_table_size is bigger than dictionary_size
 	hash_table_size = size*2;
 	
 	//allocate memory for the hash table
 	hash_table = (struct hash_elem*)calloc(hash_table_size, sizeof(struct hash_elem)); // it should be better
-	
 	if(hash_table==NULL){
 		printf("Error: hash table has not been created.\n");
 		return -1;
 	}
 	
+	//intialize the hash_table 
 	ret = hash_init();
 	if (ret!=0){
 		printf("Error: hash table has not been initialized.\n");
@@ -126,28 +145,6 @@ int hash_table_create(uint64_t size){
 	return 0;
 }
 
-
-unsigned long generate_hash_index (uint32_t father, char symbol){
-	unsigned char buffer[33];
-	char s[33];
-	
-	unsigned long index;
-	
-	//generate the string using symbol and father_index
-	sprintf((char*)buffer, "%c", symbol);
-	sprintf((char*)s, "%d", father);
-	strcat ((char*)buffer, s);	
-	/*sprintf((char*)buffer, "%d", father);
-	sprintf(s, "%c", symbol);
-	strcat ((char*)buffer, s);*/
-	
-	//compute hash for the string
-	index = hash(buffer);
-	//obtain an index from the hash
-	index %= hash_table_size;
-	
-	return index;
-}
 
 
 /*************************************************************************
@@ -209,10 +206,11 @@ int emit(uint64_t symbol)
 {
 	int ret;
 	
+	printf("<%lu>\n", symbol);
 	ret = bit_write(my_bitio_c, actual_bits_counter, symbol);
 	if (ret < 0)
 	{
-		printf("Unable to perform the bit_write\n");
+		printf("Unable to perform the bit_write");
 		return -1;
 	}		
 	
@@ -243,11 +241,10 @@ int compress (char* input_file_name)
 					ret = emit((uint64_t)hash_elem_pointer);
 					if (ret<0)
 					{
-						printf("Unable to emit the EOF\n");
+						printf("Unable to emit the last symbol\n");
 						free(hash_table);
 						return -1;
 					}
-					//printf("<%i>\n", hash_elem_pointer);
 					
 					//emit the EOF value
 					ret = emit((uint64_t)0);
@@ -259,13 +256,13 @@ int compress (char* input_file_name)
 					}					
 					
 					//flush my_bitio_c stream
-					ret = bit_flush(my_bitio_c);
+					/*ret = bit_flush(my_bitio_c);
 					if (ret<0)
 					{
 						printf("Unable to flush the bitio stream\n");
 						free(hash_table);
 						return -1;
-					}
+					}*/
 					break;
 				}
 			
