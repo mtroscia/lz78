@@ -14,7 +14,7 @@ void print_bytes(const void* object, size_t size){
 int create_checksum(FILE* fd, int size, unsigned char** out) {	
 	int ret, ret_r, i;
 	SHA256_CTX* ctx;
-	int buf_size = 128;
+	int buf_size = 256;
 	void* in = malloc(buf_size);
 	int num_blocks = size/buf_size + 1;
 	
@@ -24,33 +24,25 @@ int create_checksum(FILE* fd, int size, unsigned char** out) {
 	
 	ret = SHA256_Init(ctx);
 	if (ret != 1) {
-		printf("\nError in initializing the context...\n");
+		printf("Error in initializing the context...\n");
 		return -1;
 	}
 	
 	for (i=0; i<num_blocks; i++) {
-		if (i != num_blocks-1) {
-			ret_r = fread(in, buf_size, 1, fd);
-			if (ret_r < 0) {
-				return -1;
-			}
-			ret = SHA256_Update(ctx, in, ret_r);
-			if (ret == 0) {
-				return -1;
-			}
-		} else {
-			ret_r = fread(in, buf_size, 1, fd);
-			if (ret_r < 0) {
-				return -1;
-			}
-			ret = SHA256_Update(ctx, in, ret_r);
-			if (ret == 0) {
-				return -1;
-			}
+		ret_r = fread(in, 1, buf_size, fd);
+		if (ret_r < 0) {
+			return -1;
+		}
+		ret = SHA256_Update(ctx, in, ret_r);
+		if (ret != 1) {
+			printf("Error in updating the context...\n");
+			return -1;
 		}
 	}
+	
 	ret = SHA256_Final(*out, ctx); 
-	if (ret == 0) {
+	if (ret != 1) {
+		printf("Error in finalizing the context...\n");
 		return -1;
 	}
 	
@@ -75,6 +67,11 @@ struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_s
 	struct stat file_info;
 	int ret;
 	unsigned char* out;
+	
+	if (file == NULL){
+		printf("One of the passed parameters is NULL\n");
+		return NULL;
+	}
 	
 	hd = (struct header*)calloc(1, sizeof(struct header));
 	if (hd == NULL){
@@ -118,7 +115,7 @@ int add_header(struct bitio* my_bitio, struct header* hd) {
 	uint32_t temp32;
 	
 	if (my_bitio==NULL || hd==NULL) {
-		printf("Error\n");
+		printf("One of the passed parameters is NULL\n");
 		return -1;
 	}
 	
@@ -179,7 +176,7 @@ struct header* get_header(struct bitio* my_bitio){
 	struct header* hd;
 	
 	if (my_bitio==NULL) {
-		printf("Error\n");
+		printf("One of the passed parameters is NULL\n");
 		return NULL;
 	}
 	
@@ -238,13 +235,14 @@ struct header* get_header(struct bitio* my_bitio){
 	}
 	hd->compr_alg = (uint8_t)buf;
 	
-	ret = bit_read(my_bitio, sizeof(int)*8, &buf);
-	if (ret != sizeof(int)*8) {
+	ret = bit_read(my_bitio, 32, &buf);
+	if (ret != 32) {
 		return NULL;
 	}
 	hd->dict_size = le32toh((int)buf);
 	
 	printf("Header has been read\n");
+	
 	print_header(hd);
 	
 	return hd;
@@ -254,11 +252,12 @@ int check_integrity(struct header* hd, FILE* file){
 	unsigned char* computed_checksum;
 	struct stat file_info;
 	uint64_t size;
-	int ret;
-	int fd;
+	int ret, fd;
 	
-	if (file == NULL)
-		printf("file is NULL\n");
+	if (hd == NULL || file == NULL) {
+		printf("One of the passed parameters is NULL\n");
+		return -1;
+	}
 	
 	fd = fileno(file);
 	if (fd <= 0) {
@@ -271,7 +270,7 @@ int check_integrity(struct header* hd, FILE* file){
 		return -1;
 	}
 	size = (uint64_t)file_info.st_size;
-	printf("size %lu received %lu\n", size, hd->orig_size);
+	//printf("size %lu received %lu\n", size, hd->orig_size);
 	if (size != hd->orig_size) {
 		printf("Different file length\n");
 		return -1;
@@ -283,15 +282,17 @@ int check_integrity(struct header* hd, FILE* file){
 		printf("Error in creating the checksum...\n");
 		return -1;
 	}
-	printf("Received header ");
+	/*printf("Received header ");
 	print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
 	printf("Computed header ");
-	print_bytes(computed_checksum, SHA256_DIGEST_LENGTH);
+	print_bytes(computed_checksum, SHA256_DIGEST_LENGTH);*/
 	
 	if (memcmp(computed_checksum, hd->checksum, SHA256_DIGEST_LENGTH) != 0){
 	    printf("Checksum verification failed\n");
 	    return -1;
 	  }
+	
+	printf("Checksum verification OK\n");
 	
 	return 0;
 }
