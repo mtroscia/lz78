@@ -45,7 +45,7 @@ void print_content(char* dest)
 }
 
 int main(int argc, char *argv []) {
-    int fd, compr=-1, ret;// s=0, h=0;
+    int compr=-1, ret;// s=0, h=0;
     //compr is set to 1 if we want to compress, set to 2 if we want to decompress
     char* source=NULL, *dest=NULL;
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
@@ -175,13 +175,8 @@ int main(int argc, char *argv []) {
 		//******************************************************************************/
 		//print_content(dest);
 		/******************************************************************************/
-		//free(hash_table);
+		
 	} else if (compr==1){		//decompressing
-		fd = open(dest, (O_CREAT | O_TRUNC | O_WRONLY));
-		if (fd < 0){
-			fprintf(stderr, "Error: file can't be opened in write mode\n");
-			exit(1);
-		}
 		
 		my_bitio_d = bit_open(source, 0);
 		if (my_bitio_d == NULL){
@@ -208,8 +203,14 @@ int main(int argc, char *argv []) {
 			printf("Error in decompression\n");
 			exit(1);
 		}
+		
+		ret = bit_close(my_bitio_d);
+		if (ret < 0)
+		{
+			printf("unable to close the file\n");
+			exit (1);
+		}
 
-		close(fd);
 		file = fopen(dest, "r");
 		
 		ret = check_integrity(hd, file); 

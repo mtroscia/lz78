@@ -11,7 +11,7 @@ int array_add(uint32_t father_index, char character)
 {	
 	array_elem_counter++;
 	
-	if (array_elem_counter > dictionary_size)
+	if (array_elem_counter == dictionary_size)
 		array_reset();
 	
 	//eventually update the number of bits for the symbols
@@ -21,6 +21,10 @@ int array_add(uint32_t father_index, char character)
 	//add the element
 	dictionary[array_elem_counter].father_index =father_index;
 	dictionary[array_elem_counter].character =character;
+
+	/************************************ONLY FOR TESTING PURPOSES******************************************************/
+		//print_hash_table();
+	/******************************************************************************************************************/
 	
 	return 0;
 }
@@ -50,9 +54,6 @@ int array_init(){
 		//printf ("Actual array_elem_counter = %i\n", array_elem_counter);
 		
 	}
-	
-	//printf("Content of array_table[66]:\tfather_index %i - character %c - child_index %i\n",
-	//		dictionary[66].father_index, hash_table[66].character,hash_table[66].child_index);
 	
 	return 0;
 }
@@ -264,5 +265,6 @@ int decompress(char* dest_file_name)
 	// 		extract from bitr
 
 	fclose(f);
+	printf("file %s closed\n", dest_file_name);
 	return 0;
 }
