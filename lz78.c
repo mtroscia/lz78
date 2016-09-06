@@ -12,6 +12,8 @@
 #define DICT_SIZE 65535
 #define LZ78 1
 
+
+
 void print_help()
 {
     printf("Usage:\n");

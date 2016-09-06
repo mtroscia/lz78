@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+//FILE *fd;
+
 int array_reset();
 
 int array_add(uint32_t father_index, char character)
@@ -12,7 +14,7 @@ int array_add(uint32_t father_index, char character)
 	array_elem_counter++;
 	
 	//eventually update the number of bits for the symbols
-	if((1<<actual_bits_counter)==array_elem_counter+1) 
+	if((1<<actual_bits_counter)==array_elem_counter) 
 			actual_bits_counter++;
 	
 	//add the element
@@ -47,8 +49,6 @@ int array_init(){
 			printf("Error in array_add\n");
 			return -1;
 		}
-		
-		//printf ("Actual array_elem_counter = %i\n", array_elem_counter);
 		
 	}
 	
@@ -95,6 +95,8 @@ int init_decomp(int dict_size)
 	{
 		printf ("Error in array_init");
 	}
+	
+	//fd= fopen ("decomp_symbols.txt", "w+");
 	return 0;
 	
 }
@@ -138,13 +140,9 @@ int emit_symbols(FILE* f)
 		j--;
 	}
  
-	//printf ("string : %s\n", decomp_buffer);
+	//print into the file
+	fprintf(f, "%s",decomp_buffer);
 	
-	//for (i=0; i<hash_table_size; i++)
-	{
-		fprintf(f, "%s",decomp_buffer);
-	}
-        printf("%s\n",decomp_buffer);
 	return 0;
 }
 
@@ -165,7 +163,7 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 		decomp_buffer[i]=character;
                 
 				
-		if ((i == 0) & (child_index == (array_elem_counter-1)))
+		if ((i == 0) && (child_index == (array_elem_counter-1)))
         {
             unlikely = 1;
         }
@@ -240,20 +238,25 @@ int decode(FILE* f)
         {
             //add an unknown node
             ret = array_add(node_index, -1);
-
+	
+			
+			
             //brows the tree
             ret = find_path(node_index, unknown_node, f);
+			
+			unknown_node=1;
         }
         else
 		{
-			//brows the tree
+			//browse the tree
+			++array_elem_counter;
 			ret = find_path(node_index, unknown_node, f);
 			array_reset();
 
-            array_elem_counter++;
+            //array_elem_counter++;
             unknown_node=0;
         }
-		unknown_node=1;
+		
 	}
 	return 0;
 }
