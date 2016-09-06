@@ -72,6 +72,7 @@ int main(int argc, char *argv []) {
 			case 's':
 				//s=1;
 				dict_size = atoi(optarg);
+				dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000: dict_size;
 				break;
 			case 'h':
 				//h=1;
