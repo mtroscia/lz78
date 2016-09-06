@@ -48,7 +48,7 @@ void print_content(char* dest)
 
 int main(int argc, char *argv []) {
     int compr=-1, ret;// s=0, h=0;
-    //compr is set to 1 if we want to compress, set to 2 if we want to decompress
+    //compr is set to 0 if we want to compress, set to 1 if we want to decompress
     char* source=NULL, *dest=NULL;
     unsigned int dict_size=DICT_SIZE;//, d_dict_size;
     int opt;
@@ -112,7 +112,7 @@ int main(int argc, char *argv []) {
 		print_help();
 		exit(1);
 	}
-    
+	
 	if (compr==0){		//compressing
 		file = fopen(source, "r");
 		if (file < 0){
