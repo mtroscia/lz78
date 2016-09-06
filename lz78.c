@@ -12,6 +12,8 @@
 #define DICT_SIZE 65535
 #define LZ78 1
 
+
+
 void print_help()
 {
     printf("Usage:\n");
@@ -185,15 +187,15 @@ int main(int argc, char *argv []) {
 			return -1;
 		}
 		
-		//initialize all the data structure
-		ret = init_decomp();
-		if (ret < 0){
-			printf("Unable to perform the initialization phase.\n");
+		hd = get_header(my_bitio_d);
+		if (hd == NULL) {
 			exit(1);
 		}
 		
-		hd = get_header(my_bitio_d);
-		if (hd == NULL) {
+		//initialize all the data structure
+		ret = init_decomp(hd->dict_size);
+		if (ret < 0){
+			printf("Unable to perform the initialization phase.\n");
 			exit(1);
 		}
 		

@@ -17,12 +17,13 @@ struct array_elem* dictionary;
 int dictionary_size; 	//max number of element in the array
 int array_elem_counter;	//number of element in the hash table
 int actual_bits_counter;//number of bits for the current symbol
+int unknown_node;
 char* decomp_buffer;
 unsigned long hash(unsigned char*);
 
 
 //initialize all the stuff
-int init_decomp();
+int init_decomp(int dict_size);
 
 //perform the decompression phase
 int decompress(char* input_file_name);
