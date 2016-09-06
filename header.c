@@ -58,8 +58,10 @@ void print_header(struct header* hd){
 	printf("hd->orig_creation_time\t %lu\n", hd->orig_creation_time);
 	printf("hd->checksum\t\t ");
 	print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
+	if (hd->compressed == 1){
 	printf("hd->compr_alg\t\t %i\n", hd->compr_alg);
 	printf("hd->dict_size\t\t %i\n", hd->dict_size);
+	}
 }
 	
 struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_size){
@@ -229,6 +231,7 @@ struct header* get_header(struct bitio* my_bitio){
 		hd->checksum[i] = (unsigned char)buf;
 	}
 	
+	if (hd->compressed == 1){
 	ret = bit_read(my_bitio, 8, &buf);
 	if (ret != 8) {
 		return NULL;
@@ -240,7 +243,7 @@ struct header* get_header(struct bitio* my_bitio){
 		return NULL;
 	}
 	hd->dict_size = le32toh((int)buf);
-	
+	}
 	printf("Header has been read\n");
 	
 	print_header(hd);
@@ -258,6 +261,8 @@ int check_integrity(struct header* hd, FILE* file){
 		printf("One of the passed parameters is NULL\n");
 		return -1;
 	}
+	
+	fseek(file, 0, SEEK_SET);
 	
 	fd = fileno(file);
 	if (fd <= 0) {
@@ -277,7 +282,7 @@ int check_integrity(struct header* hd, FILE* file){
 	}
 	
 	computed_checksum = malloc(SHA256_DIGEST_LENGTH);
-	ret = create_checksum(file, size, &computed_checksum);	
+	ret = create_checksum(file, hd->orig_size, &computed_checksum);	
 	if (ret == -1) {
 		printf("Error in creating the checksum...\n");
 		return -1;

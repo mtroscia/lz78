@@ -161,3 +161,8 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 		}
 	}
 }
+
+
+FILE* get_pointer(struct bitio* b){
+	return b->f;
+}
