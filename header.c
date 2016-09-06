@@ -270,7 +270,7 @@ int check_integrity(struct header* hd, FILE* file){
 		return -1;
 	}
 	size = (uint64_t)file_info.st_size;
-	//printf("size %lu received %lu\n", size, hd->orig_size);
+	printf("size %lu received %lu\n", size, hd->orig_size);
 	if (size != hd->orig_size) {
 		printf("Different file length\n");
 		return -1;

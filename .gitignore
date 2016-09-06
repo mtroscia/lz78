@@ -54,3 +54,5 @@ compressor
 *.txt
 out.txt
 *.txt
+*.txt
+out.txt
