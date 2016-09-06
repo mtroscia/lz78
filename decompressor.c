@@ -106,7 +106,7 @@ int extend_buffer()
 	int i;
 	char *new_buffer;
 
-	new_buffer= calloc((sizeof decomp_buffer - 1) * 2,sizeof (char));
+	new_buffer= calloc((sizeof decomp_buffer) * 2,sizeof (char));
 	if (new_buffer == NULL)
 	{
 		printf("Unable to allocate enough memory\n");
@@ -114,11 +114,12 @@ int extend_buffer()
 	}
 	
 	//compy the element from the old buffer to the new one
-	for (i=0; i < strlen(decomp_buffer); i++)
+	for (i=0; i < sizeof(decomp_buffer); i++)
 	{
 		new_buffer[i] = decomp_buffer[i];
 	}
 	
+	free(decomp_buffer);
 	decomp_buffer = new_buffer;
 	return 0;
 }
@@ -185,8 +186,8 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 				return -1;
 			}
 		} 
-		else
-			i++;
+		
+		i++;
 	}
 	 //at the first step we don't have any node with unknown character value
         if (unknown_node != 0)
