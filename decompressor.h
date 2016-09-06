@@ -23,10 +23,7 @@ unsigned long hash(unsigned char*);
 
 
 //initialize all the stuff
-//int init_decomp(char*);
-
-//initialize all the stuff
-int init_decomp(uint64_t);
+int init_decomp(int dict_size);
 
 //perform the decompression phase
-int decompress(char*);
+int decompress(char* input_file_name);

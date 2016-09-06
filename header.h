@@ -32,4 +32,4 @@ struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_s
 int add_header(struct bitio* my_bitio, struct header* hd);
 
 struct header* get_header(struct bitio* file);
-int check_integrity(struct header* hd, FILE* f);
+int check_integrity(struct header* hd, FILE* file);

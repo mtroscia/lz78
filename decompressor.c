@@ -5,19 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 int array_reset();
 
 int array_add(uint32_t father_index, char character)
 {	
 	array_elem_counter++;
-	
-	if (array_elem_counter == dictionary_size)
-	{
-		array_reset();
-		//++array_elem_counter;
-		//unknown_node=0;
-	}
 	
 	//eventually update the number of bits for the symbols
 	if((1<<actual_bits_counter)==array_elem_counter+1) 
@@ -26,6 +18,10 @@ int array_add(uint32_t father_index, char character)
 	//add the element
 	dictionary[array_elem_counter].father_index =father_index;
 	dictionary[array_elem_counter].character =character;
+
+	/************************************ONLY FOR TESTING PURPOSES******************************************************/
+		//print_hash_table();
+	/******************************************************************************************************************/
 	
 	return 0;
 }
@@ -56,12 +52,7 @@ int array_init(){
 		
 	}
 	
-	//printf("Content of array_table[66]:\tfather_index %i - character %c - child_index %i\n",
-	//		dictionary[66].father_index, hash_table[66].character,hash_table[66].child_index);
-	
 	return 0;
-	
-	
 }
 
 
@@ -77,20 +68,22 @@ int array_reset(){
 			printf("Error when reinitializing the hash table");
 			return -1;
 	}
+        
+        
 	return 0;
 }
 
 
 //initialize decompression
-
-int init_decomp(uint64_t dict_size)
+int init_decomp(int dict_size)
 {	
 	int ret;
 	
 	decomp_buffer=calloc(8, sizeof (char)); 
 	
-	dictionary_size=10000;
-	
+	/**************************************change 10000 with the dict_size value included in the header****/
+	dictionary_size=dict_size;
+	/**************************************************************************************************/
 	dictionary=calloc(dictionary_size, sizeof (struct array_elem)); //10000 =dict size 
 	if (dictionary ==NULL){
 		printf("unable to create a valid tree for the decompression phase.\n");
@@ -102,8 +95,8 @@ int init_decomp(uint64_t dict_size)
 	{
 		printf ("Error in array_init");
 	}
-	
 	return 0;
+	
 }
 
 int extend_buffer()
@@ -151,24 +144,34 @@ int emit_symbols(FILE* f)
 	{
 		fprintf(f, "%s",decomp_buffer);
 	}
+        printf("%s\n",decomp_buffer);
 	return 0;
 }
 
 int find_path(uint32_t child_index, int unknown_node, FILE* f)
 {
-	int i, ret;
+	int i, ret, unlikely;
 	char character;
 	
-	i=0;
+	i = 0;
+	unlikely = 0;
 	
 	while (1)
 	{	
 		//read all the array's info
 		character = dictionary[child_index].character;
-		child_index = dictionary[child_index].father_index;
+		
 		
 		decomp_buffer[i]=character;
                 
+				
+		if ((i == 0) & (child_index == (array_elem_counter-1)))
+        {
+            unlikely = 1;
+        }
+				
+		child_index = dictionary[child_index].father_index;
+		
 		if (child_index == 0)
 			//we have reached the root of the tree
 			break;
@@ -194,6 +197,13 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
             // there is a child node with an unknown character (it is the last one!)
             dictionary[array_elem_counter-1].character = character;
 	}
+	
+	if (unlikely)
+    {
+        decomp_buffer[0] = decomp_buffer[i];
+            
+    }
+		
 	decomp_buffer[++i] = '\0';
 	
 	ret = emit_symbols(f);
@@ -206,6 +216,7 @@ int decode(FILE* f)
 	uint64_t node_index;
 	int ret;
 	
+	unknown_node=0;
 	
 	printf ("\nIn decode\n");
 	while (1)
@@ -225,14 +236,25 @@ int decode(FILE* f)
 			break;
 		}
 		
-		//add an unknown node
-		ret = array_add(node_index, '?');
-		
-        //brows the tree
-		ret = find_path(node_index, unknown_node, f);
-		
+		if (array_elem_counter < dictionary_size - 1)
+        {
+            //add an unknown node
+            ret = array_add(node_index, -1);
+
+            //brows the tree
+            ret = find_path(node_index, unknown_node, f);
+        }
+        else
+		{
+			//brows the tree
+			ret = find_path(node_index, unknown_node, f);
+			array_reset();
+
+            array_elem_counter++;
+            unknown_node=0;
+        }
 		unknown_node=1;
-	} 
+	}
 	return 0;
 }
 
@@ -270,5 +292,6 @@ int decompress(char* dest_file_name)
 	// 		extract from bitr
 
 	fclose(f);
+	printf("file %s closed\n", dest_file_name);
 	return 0;
 }

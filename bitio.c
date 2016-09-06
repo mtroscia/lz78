@@ -47,7 +47,6 @@ int bit_flush(struct bitio* b)
 	}
 	
 	if(b->mode==1 && b->wp>0){
-		/********************DIFFERENT FROM LESSON***************/
 		if(fwrite((void*)&b->data, 1, ((b->wp)+7)/8,  b->f)<=0){
 			ret=-1;		
 		}
@@ -93,9 +92,7 @@ int bit_write(struct bitio * b, uint32_t size, uint64_t data)
 		b->data|=data<<b->wp;	//copy the block into the buffer from wp on
 		b->wp+=size;
 	}
-	else{
-		/********************DIFFERENT FROM LESSON***************/
-		//data&=(1UL<<space)-1; 	//pick the rightmost space bits		
+	else{	
 		if(b->wp < 64)
 			b->data|=data<<b->wp;	//copy the block into the buffer from wp on
 
@@ -109,7 +106,6 @@ int bit_write(struct bitio * b, uint32_t size, uint64_t data)
 	}
 	return 0;
 }
-
 
 int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 {
@@ -149,11 +145,8 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 			/*size-space is the remaining number of bits to read: 
 			if b->wp>=size-space, we can read the remaining bits and we can add them to the data buffer*/
 			
-			/********************DIFFERENT FROM LESSON***************/
-			//*data^=*data; //clear all bits of data buffer
 			*data|=b->data<<space;
 			
-			/********************DIFFERENT FROM LESSON***************/
 			if(size<64)
 				*data&=(uint64_t)((1UL<<size)-1); //only if size<64, otherwise we go out of UL and we mask all
 
@@ -167,8 +160,4 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 			return space+b->wp;		
 		}
 	}
-}
-
-FILE* get_file_pointer(struct bitio* b){
-	return b->f;
 }

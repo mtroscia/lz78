@@ -1,13 +1,12 @@
 #include "compressor.h"
 #include <string.h>
 
-int hash_add(uint32_t, char, uint32_t);
-int hash_init();
-int hash_reset();
-unsigned long generate_hash_index(uint32_t, char);
+
+//unsigned long generate_hash_index(uint32_t, char);
 /****************************************************************************************************/
 void print_hash_table();
 /******************************************************************************************************/
+
 
 unsigned long hash(unsigned char *str){
     unsigned long hash = 5381;
@@ -18,71 +17,30 @@ unsigned long hash(unsigned char *str){
 		return hash;
 }
 
-int hash_table_create(uint64_t size){
-	int ret;
+
+unsigned long generate_hash_index (uint32_t father, char symbol){
+	unsigned char buffer[33];
+	char s[33];
 	
-	dictionary_size = size;
-	hash_table_size = size+(size/2);
-	//printf("Dictionary_size = %i - hash_table_size = %i\n", dictionary_size, hash_table_size);
+	unsigned long index;
 	
-	/*********************************************************************************************************/
-	//hash_table = (struct hash_elem*)calloc(1, sizeof(struct hash_elem)*size);
-	hash_table = (struct hash_elem*)calloc(hash_table_size, sizeof(struct hash_elem)); // it should be better
-	/*********************************************************************************************************/
+	//generate the string using symbol and father_index
+	sprintf((char*)buffer, "%c", symbol);
+	sprintf((char*)s, "%d", father);
+	strcat ((char*)buffer, s);	
 	
-	if(hash_table==NULL){
-		printf("Error: hash table has not been created.\n");
-		return -1;
-	}
+	//compute hash for the string
+	index = hash(buffer);
+	//obtain an index from the hash
+	index %= hash_table_size;
 	
-	ret = hash_init();
-	if (ret!=0){
-		printf("Error: hash table has not been initialized.\n");
-		free(hash_table);
-		return -1;
-	}
-	
-	return 0;
+	return index;
 }
 
-int hash_init(){
-	int i, ret;
-	char c;
-	
-	hash_elem_counter=0;
-	actual_bits_counter=9;
-	
-	//add all ASCII characters
-	for (i=0; i<=255; i++)
-	{
-		c=i;
-		//printf("Added %c\n", c);
-		
-		ret = hash_add(0, c, ++hash_elem_counter);
-		if (ret!=0){
-			printf("Error in hash_add\n");
-			return -1;
-		}
-		
-		//printf ("Actual hash_elem_counter = %i\n", hash_elem_counter);
-		
-	}
-	
-	//printf("Content of hash_table[0]:\tfather_index %i - character %c - child_index %i\n",
-			//hash_table[11598].father_index, hash_table[11598].character,hash_table[11598].child_index);
-	
-	return 0;
-}
 
 int hash_add (uint32_t father, char symbol, uint32_t child){
 	unsigned long index;
 	int collision;
-	
-	if (child == dictionary_size)
-	{
-		hash_reset();
-		child=hash_elem_counter;
-	}
 	
 	//eventually update the number of bits for the symbols
 	if((1<<actual_bits_counter)==hash_elem_counter+1) 
@@ -119,60 +77,30 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 	return 0;
 }
 
-unsigned long generate_hash_index (uint32_t father, char symbol){
-	unsigned char buffer[33];
-	char s[2];
-	
-	unsigned long index;
-	
-	//generate the string using father and symbol
-	sprintf((char*)buffer, "%d", father);
-	sprintf(s, "%c", symbol);
-	strcat ((char*)buffer, s);
-	//compute hash for the string
-	index = hash(buffer);
-	//obtain an index from the hash
-	index %= hash_table_size;
 
+int hash_init(){
+	int i, ret;
+	char c;
 	
-	//printf("string: %s- hash index: %lu\n", buffer, index);
+	hash_elem_counter=0;
+	actual_bits_counter=9;
 	
-	return index;
-}
-
-
-/*************************************************************************
-The function searches a node in the hash table using father-char as a key.
-If it finds the node, then it returns the index; otherwise it returns 0.
-**************************************************************************/
-uint32_t hash_search (uint32_t father, char symbol){
-	unsigned long index;
-	int not_found;
-	
-	index = generate_hash_index(father, symbol);
-	
-	not_found = 1;
-	do
+	//add all ASCII characters
+	for (i=0; i<=255; i++)
 	{
-		if (hash_table[index].father_index==father && hash_table[index].character==symbol)
-		{
-			//The wanted entry was found
-			not_found = 0;
-			//printf("%i %c found:\t child value=%i\n",hash_table[index].father_index,
-					//hash_table[index].character,hash_table[index].child_index );
-		}else
-		{
-			if (hash_table[index].child_index==0)
-			{
-				//Empty entry
-				return 0;
-			} else  //Search into the next entry
-				index = (index+1)%hash_table_size;
-		}		
-	}while (not_found);
+		c=i;
+		//printf("Added %c\n", c);
+		
+		ret = hash_add(0, c, ++hash_elem_counter);
+		if (ret!=0){
+			printf("Error in hash_add\n");
+			return -1;
+		}
+	}
 	
-	return hash_table[index].child_index;
+	return 0;
 }
+
 
 int hash_reset(){
 	int ret;
@@ -189,6 +117,67 @@ int hash_reset(){
 	printf("reset\n");
 	return 0;	
 }
+
+
+int hash_table_create(uint64_t size){
+	int ret;
+	
+	dictionary_size = size;
+	
+	//the hash_table_size is bigger than dictionary_size
+	hash_table_size = size*2;
+	
+	//allocate memory for the hash table
+	hash_table = (struct hash_elem*)calloc(hash_table_size, sizeof(struct hash_elem)); // it should be better
+	if(hash_table==NULL){
+		printf("Error: hash table has not been created.\n");
+		return -1;
+	}
+	
+	//intialize the hash_table 
+	ret = hash_init();
+	if (ret!=0){
+		printf("Error: hash table has not been initialized.\n");
+		free(hash_table);
+		return -1;
+	}
+	
+	return 0;
+}
+
+
+
+/*************************************************************************
+The function searches a node in the hash table using char-father_index as a key.
+If it finds the node, then it returns the index; otherwise it returns 0.
+**************************************************************************/
+uint32_t hash_search (uint32_t father, char symbol){
+	unsigned long index;
+	int not_found;
+	
+	index = generate_hash_index(father, symbol);
+	
+	not_found = 1;
+	do
+	{
+		if (hash_table[index].father_index==father && hash_table[index].character==symbol)
+		{
+			//The wanted entry was found
+			not_found = 0;
+		}else
+		{
+			if (hash_table[index].child_index==0)
+			{
+				//Empty entry
+				return 0;
+			} else  //Search into the next entry
+				index = (index+1)%hash_table_size;
+		}		
+	}while (not_found);
+	
+	return hash_table[index].child_index;
+}
+
 
 /************************************ONLY FOR TESTING PURPOSES******************************************************/
 void print_hash_table(){
@@ -212,20 +201,22 @@ void print_hash_table(){
 }	
 /******************************************************************************************************************/
 
+
 int emit(uint64_t symbol)
 {
 	int ret;
 	
-
+	//printf("<%lu>\n", symbol);
 	ret = bit_write(my_bitio_c, actual_bits_counter, symbol);
 	if (ret < 0)
 	{
-		printf("Unable to perform the bit_write\n");
+		printf("Unable to perform the bit_write");
 		return -1;
 	}		
 	
 	return 0;
 }
+
 
 int compress (char* input_file_name)
 {
@@ -250,11 +241,10 @@ int compress (char* input_file_name)
 					ret = emit((uint64_t)hash_elem_pointer);
 					if (ret<0)
 					{
-						printf("Unable to emit the EOF\n");
+						printf("Unable to emit the last symbol\n");
 						free(hash_table);
 						return -1;
 					}
-					//printf("<%i>\n", hash_elem_pointer);
 					
 					//emit the EOF value
 					ret = emit((uint64_t)0);
@@ -264,18 +254,15 @@ int compress (char* input_file_name)
 						free(hash_table);
 						return -1;
 					}					
-					//printf("<0>\n");
 					
 					//flush my_bitio_c stream
-
-					ret = bit_flush(my_bitio_c);
+					/*ret = bit_flush(my_bitio_c);
 					if (ret<0)
 					{
 						printf("Unable to flush the bitio stream\n");
 						free(hash_table);
 						return -1;
-					}
-
+					}*/
 					break;
 				}
 			
@@ -296,10 +283,17 @@ int compress (char* input_file_name)
 						free(hash_table);
 						return -1;
 					}
-					//printf("<%i>\n", hash_elem_pointer);
+					
+					
+					if (++hash_elem_counter == dictionary_size)
+					{
+						hash_reset();
+						
+						hash_elem_counter++;
+					}
 					
 					//add the new node 
-					ret = hash_add(hash_elem_pointer, (char)c, ++hash_elem_counter);
+					ret = hash_add(hash_elem_pointer, (char)c, hash_elem_counter);
 					if (ret!=0){
 						printf("Error in hash_add");
 						free(hash_table);
