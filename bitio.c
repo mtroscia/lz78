@@ -112,14 +112,14 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 	int space;
 	if(b==NULL || b-> mode!=0 || size>64){
 		errno=EINVAL;
-		printf("Problem in initialization of bitio...\n");
+		fprintf(stderr, "Problem in initializing bitio...\n");
 		return -1;
 	}
 	
 	*data=0;		//clear all bits of data buffer
 	space=(int)(b->wp)-(int)(b->rp);
 	if(size==0){
-		printf("No bits to read...\n");
+		fprintf(stderr, "No bits to read...\n");
 		return 0; //no more bits to read	
 	}
 	
@@ -136,7 +136,7 @@ int bit_read(struct bitio* b, uint32_t size, uint64_t *data)
 		int ret = fread(&(b->data), 1, 8, b->f);
 		if (ret<=0) {
 			errno=ENODATA;
-			printf("bitio->f no data\n");
+			fprintf(stderr, "Bitio->f no data\n");
 			return -1;
 		}
 				
