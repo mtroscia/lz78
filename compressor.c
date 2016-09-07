@@ -1,8 +1,4 @@
 #include "compressor.h"
-#include <string.h>
-
-
-
 
 unsigned long hash(unsigned char *str){
     unsigned long hash = 5381;
@@ -12,7 +8,6 @@ unsigned long hash(unsigned char *str){
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 		return hash;
 }
-
 
 unsigned long generate_hash_index (uint32_t father, char symbol){
 	unsigned char buffer[33];
@@ -51,7 +46,7 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 	{
 		if (hash_table[index].child_index == 0) 
 		{
-			//There isn't a valid value in this entry (empty entry): insert the element
+			//there isn't a valid value in this entry (empty entry): insert the element
 			hash_table[index].father_index = father;
 			hash_table[index].character = symbol;
 			hash_table[index].child_index = hash_elem_counter;
@@ -59,7 +54,7 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 		}
 		else
 		{
-			//Hash table treated as a circular array
+			//hash table treated as a circular array
 			index = (index+1)%hash_table_size;
 		}
 	}
@@ -72,18 +67,19 @@ int hash_init(){
 	int i, ret;
 	char c;
 	
-	hash_elem_counter=0;
-	actual_bits_counter=9;
+	hash_elem_counter = 0;
+	actual_bits_counter = 9;
 	
 	//add all ASCII characters
 	for (i=0; i<=255; i++)
 	{
 		c=i;
+		
 		//printf("Added %c\n", c);
 		
 		ret = hash_add(0, c, ++hash_elem_counter);
 		if (ret!=0){
-			printf("Error in hash_add\n");
+			fprintf(stderr, "Error in hash_add()\n");
 			return -1;
 		}
 	}
@@ -96,12 +92,12 @@ int hash_reset(){
 	int ret;
 	
 	//reset all fields
-	bzero(hash_table, hash_table_size*sizeof (struct hash_elem));
+	bzero(hash_table, hash_table_size*sizeof(struct hash_elem));
 	
 	//add all root's children
 	ret = hash_init();	
 	if (ret!=0){
-			printf("Error when reinitializing the hash table");
+			fprintf(stderr, "Error when reinitializing the hash table\n");
 			return -1;
 	}
 	
@@ -118,31 +114,27 @@ int hash_table_create(uint64_t size){
 	hash_table_size = size*2;
 	
 	//allocate memory for the hash table
-	hash_table = (struct hash_elem*)calloc(hash_table_size, sizeof(struct hash_elem)); // it should be better
-	if(hash_table==NULL){
-		printf("Error: hash table has not been created.\n");
+	hash_table = (struct hash_elem*)calloc(hash_table_size, sizeof(struct hash_elem));
+	if (hash_table == NULL){
+		fprintf(stderr, "Error: hash table has not been created.\n");
 		return -1;
 	}
 	
 	//intialize the hash_table 
 	ret = hash_init();
 	if (ret!=0){
-		printf("Error: hash table has not been initialized.\n");
+		fprintf(stderr, "Error: hash table has not been initialized.\n");
 		free(hash_table);
 		return -1;
 	}
-	
-	//fc = fopen ("comp_symbols.txt", "w+");
 	
 	return 0;
 }
 
 
 
-/*************************************************************************
-The function searches a node in the hash table using char-father_index as a key.
-If it finds the node, then it returns the index; otherwise it returns 0.
-**************************************************************************/
+/*The function searches a node in the hash table using char-father_index as a key.
+  If it finds the node, then it returns the index; otherwise it returns 0.*/
 uint32_t hash_search (uint32_t father, char symbol){
 	unsigned long index;
 	int not_found;
@@ -154,16 +146,16 @@ uint32_t hash_search (uint32_t father, char symbol){
 	{
 		if (hash_table[index].father_index==father && hash_table[index].character==symbol)
 		{
-			//The wanted entry was found
+			//the wanted entry is found
 			not_found = 0;
 		}else
 		{
-			if (hash_table[index].child_index==0)
+			if (hash_table[index].child_index==0)	//empty entry
 			{
-				//Empty entry
 				return 0;
-			} else  //Search into the next entry
+			} else {  	//search into the next entry
 				index = (index+1)%hash_table_size;
+			}
 		}		
 	}while (not_found);
 	
@@ -178,7 +170,7 @@ int emit(uint64_t symbol)
 	ret = bit_write(my_bitio_c, actual_bits_counter, symbol);
 	if (ret < 0)
 	{
-		printf("Unable to perform the bit_write");
+		fprintf(stderr, "Unable to perform the bit_write\n");
 		return -1;
 	}		
 	
@@ -199,14 +191,13 @@ int compress (char* input_file_name)
 	while(1){
 		c = getc(input_file);
 		
-		
 		again:	if (c==EOF)
 				{					
 					//emit the last father_index
 					ret = emit((uint64_t)hash_elem_pointer);
 					if (ret<0)
 					{
-						printf("Unable to emit the last symbol\n");
+						fprintf(stderr, "Unable to emit the last symbol\n");
 						free(hash_table);
 						return -1;
 					}
@@ -215,7 +206,7 @@ int compress (char* input_file_name)
 					ret = emit((uint64_t)0);
 					if (ret<0)
 					{
-						printf("Unable to emit the EOF\n");
+						fprintf(stderr, "Unable to emit the EOF\n");
 						free(hash_table);
 						return -1;
 					}					
@@ -236,11 +227,10 @@ int compress (char* input_file_name)
 					ret = emit((uint64_t)hash_elem_pointer);
 					if (ret<0)
 					{
-						printf("Unable to emit the EOF\n");
+						fprintf(stderr, "Unable to emit the EOF\n");
 						free(hash_table);
 						return -1;
 					}
-					
 					
 					if (++hash_elem_counter == dictionary_size)
 					{
@@ -251,7 +241,7 @@ int compress (char* input_file_name)
  						//add the new node 
  						ret = hash_add(hash_elem_pointer, (char)c, hash_elem_counter);
  						if (ret!=0){
- 							printf("Error in hash_add");
+ 							fprintf(stderr, "Error in hash_add");
  							free(hash_table);
  							return -1;
  						}
@@ -259,7 +249,7 @@ int compress (char* input_file_name)
 					
 					//restart the search from the root
 					hash_elem_pointer = 0;
-					//now i search the caracter c again
+					//now search the character c again
 					goto again;
 				}
 	}

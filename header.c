@@ -1,3 +1,5 @@
+//functions to build and retrieve the header from files
+
 #include "header.h"
 
 void print_bytes(const void* object, size_t size){
@@ -24,7 +26,7 @@ int create_checksum(FILE* fd, int size, unsigned char** out) {
 	
 	ret = SHA256_Init(ctx);
 	if (ret != 1) {
-		printf("Error in initializing the context...\n");
+		fprintf(stderr, "Error in initializing the context...\n");
 		return -1;
 	}
 	
@@ -35,14 +37,14 @@ int create_checksum(FILE* fd, int size, unsigned char** out) {
 		}
 		ret = SHA256_Update(ctx, in, ret_r);
 		if (ret != 1) {
-			printf("Error in updating the context...\n");
+			fprintf(stderr, "Error in updating the context...\n");
 			return -1;
 		}
 	}
 	
 	ret = SHA256_Final(*out, ctx); 
 	if (ret != 1) {
-		printf("Error in finalizing the context...\n");
+		fprintf(stderr, "Error in finalizing the context...\n");
 		return -1;
 	}
 	
@@ -58,8 +60,10 @@ void print_header(struct header* hd){
 	printf("hd->orig_creation_time\t %lu\n", hd->orig_creation_time);
 	printf("hd->checksum\t\t ");
 	print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
-	printf("hd->compr_alg\t\t %i\n", hd->compr_alg);
-	printf("hd->dict_size\t\t %i\n", hd->dict_size);
+	if (hd->compressed == 1){
+		printf("hd->compr_alg\t\t %i\n", hd->compr_alg);
+		printf("hd->dict_size\t\t %i\n", hd->dict_size);
+	}
 }
 	
 struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_size){
@@ -69,7 +73,7 @@ struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_s
 	unsigned char* out;
 	
 	if (file == NULL){
-		printf("One of the passed parameters is NULL\n");
+		fprintf(stderr, "One of the passed parameters is NULL\n");
 		return NULL;
 	}
 	
@@ -84,7 +88,7 @@ struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_s
 	strcpy(hd->orig_filename, file_name);
 	
 	if (stat(file_name, &file_info)) {
-		printf("Error in reading the file info\n");
+		fprintf(stderr, "Error in reading the file info\n");
 		free(hd);
 		return NULL;
 	}
@@ -95,7 +99,7 @@ struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_s
 	out = malloc(SHA256_DIGEST_LENGTH);
 	ret = create_checksum(file, hd->orig_size, &out);	
 	if (ret == -1) {
-		printf("Error in creating the checksum...\n");
+		fprintf(stderr, "Error in creating the checksum...\n");
 		free(hd);
 		return NULL;
 	}
@@ -115,23 +119,26 @@ int add_header(struct bitio* my_bitio, struct header* hd) {
 	uint32_t temp32;
 	
 	if (my_bitio==NULL || hd==NULL) {
-		printf("One of the passed parameters is NULL\n");
+		fprintf(stderr, "One of the passed parameters is NULL\n");
 		return -1;
 	}
 	
 	ret = bit_write(my_bitio, 8, (uint8_t)hd->compressed);
 	if (ret != 0) {
+		fprintf(stderr, "Error in bit_write()\n");
 		return -1;
 	}
 	
 	ret = bit_write(my_bitio, 8, (uint8_t)hd->orig_filename_len);
 	if (ret != 0) {
+		fprintf(stderr, "Error in bit_write()\n");
 		return -1;
 	}
 	
 	for (i=0; i<hd->orig_filename_len; i++) {
 		ret = bit_write(my_bitio, 8, (char)(hd->orig_filename[i]));
 		if (ret != 0) {
+			fprintf(stderr, "Error in bit_write()\n");
 			return -1;
 		}
 	}
@@ -139,30 +146,35 @@ int add_header(struct bitio* my_bitio, struct header* hd) {
 	temp64 = htole64((uint64_t)hd->orig_size);
 	ret = bit_write(my_bitio, 64, temp64);
 	if (ret != 0) {
+		fprintf(stderr, "Error in bit_write()\n");
 		return -1;
 	}
 	
 	temp64 = htole64((uint64_t)hd->orig_creation_time);
 	ret = bit_write(my_bitio, 64, temp64);
 	if (ret != 0) {
+		fprintf(stderr, "Error in bit_write()\n");
 		return -1;
 	}
 	
 	for (i=0; i<SHA256_DIGEST_LENGTH; i++) {
 		ret = bit_write(my_bitio, 8, (unsigned char)(hd->checksum[i]));
 		if (ret != 0) {
+			fprintf(stderr, "Error in bit_write()\n");
 			return -1;
 		}
 	}
 	
 	ret = bit_write(my_bitio, 8, (uint8_t)(hd->compr_alg));
 	if (ret != 0) {
+		fprintf(stderr, "Error in bit_write()\n");
 		return -1;
 	}
 	
 	temp32 = htole32((int)hd->dict_size);
 	ret = bit_write(my_bitio, 32, temp32);
 	if (ret != 0) {
+		fprintf(stderr, "Error in bit_write()\n");
 		return -1;
 	}
 	
@@ -176,7 +188,7 @@ struct header* get_header(struct bitio* my_bitio){
 	struct header* hd;
 	
 	if (my_bitio==NULL) {
-		printf("One of the passed parameters is NULL\n");
+		fprintf(stderr, "One of the passed parameters is NULL\n");
 		return NULL;
 	}
 	
@@ -189,12 +201,14 @@ struct header* get_header(struct bitio* my_bitio){
 	
 	ret = bit_read(my_bitio, 8, &buf);
 	if (ret != 8) {
+		fprintf(stderr, "Error in bit_read()\n");
 		return NULL;
 	}
 	hd->compressed = (uint8_t)buf;
 	
 	ret = bit_read(my_bitio, 8, &buf);
 	if (ret != 8) {
+		fprintf(stderr, "Error in bit_read()\n");
 		return NULL;
 	}
 	hd->orig_filename_len = (uint8_t)buf;
@@ -203,6 +217,7 @@ struct header* get_header(struct bitio* my_bitio){
 	for (i=0; i<hd->orig_filename_len; i++) {
 		ret = bit_read(my_bitio, 8, &buf);
 		if (ret != 8) {
+			fprintf(stderr, "Error in bit_read()\n");
 			return NULL;
 		}
 		hd->orig_filename[i] = (char)buf;
@@ -211,12 +226,14 @@ struct header* get_header(struct bitio* my_bitio){
 	
 	ret = bit_read(my_bitio, 64, &buf);
 	if (ret != 64) {
+		fprintf(stderr, "Error in bit_read()\n");
 		return NULL;
 	}
 	hd->orig_size = le64toh(buf);
 
 	ret = bit_read(my_bitio, 64, &buf);
 	if (ret != 64) {
+		fprintf(stderr, "Error in bit_read()\n");
 		return NULL;
 	}
 	hd->orig_creation_time = le64toh(buf);
@@ -224,25 +241,29 @@ struct header* get_header(struct bitio* my_bitio){
 	for (i=0; i<SHA256_DIGEST_LENGTH; i++) {
 		ret = bit_read(my_bitio, 8, &buf);
 		if (ret != 8) {
+			fprintf(stderr, "Error in bit_read()\n");
 			return NULL;
 		}
 		hd->checksum[i] = (unsigned char)buf;
 	}
 	
-	ret = bit_read(my_bitio, 8, &buf);
-	if (ret != 8) {
-		return NULL;
+	if (hd->compressed == 1){
+		ret = bit_read(my_bitio, 8, &buf);
+		if (ret != 8) {
+			fprintf(stderr, "Error in bit_read()\n");
+			return NULL;
+		}
+		hd->compr_alg = (uint8_t)buf;
+		
+		ret = bit_read(my_bitio, 32, &buf);
+		if (ret != 32) {
+			fprintf(stderr, "Error in bit_read()\n");
+			return NULL;
+		}
+		hd->dict_size = le32toh((int)buf);
 	}
-	hd->compr_alg = (uint8_t)buf;
-	
-	ret = bit_read(my_bitio, 32, &buf);
-	if (ret != 32) {
-		return NULL;
-	}
-	hd->dict_size = le32toh((int)buf);
 	
 	printf("Header has been read\n");
-	
 	print_header(hd);
 	
 	return hd;
@@ -255,40 +276,40 @@ int check_integrity(struct header* hd, FILE* file){
 	int ret, fd;
 	
 	if (hd == NULL || file == NULL) {
-		printf("One of the passed parameters is NULL\n");
+		fprintf(stderr, "One of the passed parameters is NULL\n");
 		return -1;
 	}
 	
+	fseek(file, 0, SEEK_SET);
+	
 	fd = fileno(file);
 	if (fd <= 0) {
-		printf("Error in fd...\n");
+		fprintf(stderr, "Error in fileno()\n");
 		return -1;
 	}
 	
 	if (fstat(fd, &file_info)) {
-		printf("Error in reading the file info\n");
+		fprintf(stderr, "Error in reading the file info\n");
 		return -1;
 	}
 	size = (uint64_t)file_info.st_size;
-	printf("size %lu received %lu\n", size, hd->orig_size);
+	
+	//testing
+	//printf("size %lu received %lu\n", size, hd->orig_size);
+	
 	if (size != hd->orig_size) {
-		printf("Different file length\n");
+		fprintf(stderr, "Different file length\n");
 		return -1;
 	}
 	
 	computed_checksum = malloc(SHA256_DIGEST_LENGTH);
-	ret = create_checksum(file, size, &computed_checksum);	
+	ret = create_checksum(file, hd->orig_size, &computed_checksum);	
 	if (ret == -1) {
-		printf("Error in creating the checksum...\n");
+		fprintf(stderr, "Error in creating the checksum...\n");
 		return -1;
 	}
-	/*printf("Received header ");
-	print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
-	printf("Computed header ");
-	print_bytes(computed_checksum, SHA256_DIGEST_LENGTH);*/
-	
 	if (memcmp(computed_checksum, hd->checksum, SHA256_DIGEST_LENGTH) != 0){
-	    printf("Checksum verification failed\n");
+	    fprintf(stderr, "Checksum verification failed\n");
 	    return -1;
 	  }
 	
