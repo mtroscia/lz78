@@ -1,9 +1,10 @@
-/*it contains function to build the array used by the decompressor
-and functions to decompress*/
+//functions to build the array used by the decompressor and functions to decompress
 
 #include <stdio.h>
 #include <errno.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "bitio.h"
 
@@ -12,7 +13,6 @@ struct array_elem{
 	uint8_t character;
 };
 
-struct bitio* my_bitio_d;
 struct array_elem* dictionary;
 int dictionary_size; 	//max number of element in the array
 int array_elem_counter;	//number of element in the hash table
@@ -21,6 +21,7 @@ int unknown_node;
 char* decomp_buffer;
 unsigned long hash(unsigned char*);
 
+struct bitio* my_bitio_d;
 
 //initialize all the stuff
 int init_decomp(int dict_size);

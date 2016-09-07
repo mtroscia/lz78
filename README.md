@@ -6,3 +6,4 @@ Usage:
 Other options:
 	-s <dictionary_size>
 	-h for help
+	-v verbose
