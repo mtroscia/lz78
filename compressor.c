@@ -181,6 +181,7 @@ int compress (char* input_file_name)
 {
 	int ret, c;
 	FILE* input_file;
+	int hash_elem_pointer;	//pointer to the actual node
 	
 	input_file = fopen(input_file_name, "r");
 	
