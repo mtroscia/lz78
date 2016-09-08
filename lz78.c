@@ -382,6 +382,11 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
+		if (dest == NULL){
+			dest = calloc (hd ->orig_filename_len, sizeof(char));
+			strcpy (dest, hd->orig_filename);
+		}
+		
 		gettimeofday(&start, NULL);
 		
 		if (verbose == 1){
