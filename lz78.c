@@ -213,13 +213,14 @@ int obtain_orig_file(struct bitio* b, struct header* hd, char* dest){
 
 
 int main(int argc, char *argv []) {
-    int compr = -1, ret, verbose = 0, opt;
+    int compr = -1, ret, verbose = 0, opt, s;
     //compr is set to 1 to compress, set to 2 to decompress
     char* source = NULL, *dest = NULL;
     unsigned int dict_size = DICT_SIZE;
 	FILE* file;
 	struct header* hd = NULL;
 	struct timeval start, stop;
+
 
     while ((opt = getopt(argc, argv, "cdi:o:s:hv"))!=-1) {
         switch (opt) {
@@ -236,12 +237,9 @@ int main(int argc, char *argv []) {
 				dest = optarg; //take the output name from optarg
 				break;
 			case 's':
-				if (compr == 1)
-					fprintf(stderr,"\nYou can't choose the dictionary size in the decompression phase.\nThis option will be ignored\n");
-				else{
-					dict_size = atoi(optarg);
-					dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000 : dict_size;
-				}
+				s=1;
+				dict_size = atoi(optarg);
+				dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000 : dict_size;
 				break;
 			case 'h':
 				print_help();
@@ -278,6 +276,9 @@ int main(int argc, char *argv []) {
 		exit(1);
 	}
 
+	if (compr == 1 && s == 1)
+		fprintf(stderr,"\nYou can't choose the dictionary size in the decompression phase.\nThis option will be ignored\n");
+	
 	
 	if (compr == 0 && dest == NULL){	
 		fprintf(stderr, "You don't have specified an output name.\n");
