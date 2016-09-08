@@ -2,6 +2,7 @@
 
 int array_reset();
 
+//add new array element
 int array_add(uint32_t father_index, char character)
 {	
 	array_elem_counter++;
@@ -11,8 +12,8 @@ int array_add(uint32_t father_index, char character)
 			actual_bits_counter++;
 	
 	//add the element
-	dictionary[array_elem_counter].father_index =father_index;
-	dictionary[array_elem_counter].character =character;
+	dictionary[array_elem_counter].father_index = father_index;
+	dictionary[array_elem_counter].character = character;
 	
 	return 0;
 }
@@ -68,6 +69,7 @@ int init_decomp(int dict_size)
 	//allocate the buffer
 	decomp_buffer = calloc(8, sizeof (char)); 
 	
+	//store dictionary size
 	dictionary_size = dict_size;
 	
 	//allocate the tree
@@ -100,7 +102,7 @@ int extend_buffer()
 		return -1;
 	}
 	
-	//copy the element from decomp_buffer (global variable) to the new one
+	//copy the elements from decomp_buffer (global variable) to the new one
 	for (i=0; i < sizeof(decomp_buffer); i++)
 	{
 		new_buffer[i] = decomp_buffer[i];
@@ -136,24 +138,25 @@ int emit_symbols(FILE* f)
 	return 0;
 }
 
+//Navigate the tree from the leaf to the root
 int find_path(uint32_t child_index, int unknown_node, FILE* f)
 {
-	int i, ret, unlikely;
+	int i, ret, last_path;
 	char character;
 	
 	i = 0;
-	unlikely = 0;
+	last_path = 0;
 	
 	while (1)
 	{	
 		//add the read char to the buffer
 		character = dictionary[child_index].character;
-		decomp_buffer[i]=character;       
+		decomp_buffer[i] = character;       
 				
 		//if the last inserted node (its character is not defined!) is equal to the 
-		//received symbol, then we set the unlikely flag
+		//received symbol, then we set thelast_pathy flag
 		if ((i == 0) && (child_index == (array_elem_counter-1)))
-            unlikely = 1;
+           last_path = 1;
 				
 		//the next node index
 		child_index = dictionary[child_index].father_index;
@@ -171,7 +174,6 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 				return -1;
 			}
 		} 
-		
 		i++;
 	}
 		
@@ -180,7 +182,7 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 		//there is a child node with an unknown character (it is the last one!)
 		dictionary[array_elem_counter-1].character = character;
 	
-	if (unlikely)
+	if (last_path)
 		//decomp_buffer[0] has an unspecified value
         decomp_buffer[0] = decomp_buffer[i];    
 		
@@ -196,7 +198,7 @@ int decode(FILE* f)
 	uint64_t node_index;
 	int ret;
 	
-	unknown_node=0;
+	int unknown_node = 0;
 	
 	while (1)
 	{
@@ -269,6 +271,5 @@ int decompress(char* dest_file_name)
 	fclose(f);
 	
 	free (dictionary);
-	
 	return 0;
 }
