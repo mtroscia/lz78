@@ -236,8 +236,12 @@ int main(int argc, char *argv []) {
 				dest = optarg; //take the output name from optarg
 				break;
 			case 's':
-				dict_size = atoi(optarg);
-				dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000 : dict_size;
+				if (compr == 1)
+					fprintf(stderr,"\nYou can't choose the dictionary size in the decompression phase.\nThis option will be ignored\n");
+				else{
+					dict_size = atoi(optarg);
+					dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000 : dict_size;
+				}
 				break;
 			case 'h':
 				print_help();
@@ -274,9 +278,26 @@ int main(int argc, char *argv []) {
 		exit(1);
 	}
 
-	if (compr!=-1 && (source == NULL || dest == NULL)){	
-		fprintf(stderr, "Error: you must always specify input and output files\n");
-		print_help();
+	
+	if (compr == 0 && dest == NULL){	
+		fprintf(stderr, "You don't have specified an output name.\n");
+		
+		char *extension;
+		
+		dest = calloc (strlen (source) + 1, sizeof(char));
+			
+		strcpy(dest, source);
+		extension = strrchr(dest, '.');
+		if (extension != NULL)
+			*extension = '\0';
+
+		strcat(dest, ".cgt");
+			
+		fprintf(stderr, "\nWe will use this name: %s\n", dest);
+	}
+	
+	if (source == NULL){
+		fprintf(stderr, "Error: you must always specify the input files\n");
 		exit(1);
 	}
     
