@@ -24,29 +24,6 @@ void print_help()
 	fprintf(stderr, "-v verbose\n\n");
 }
 
-//testing
-void print_content(char* dest)
-{
-	my_bitio_c = bit_open(dest, 0);
-	uint64_t data;
-	int ret;
-	
-	ret=0;
-	while (1)
-	{
-		ret = bit_read(my_bitio_c, 9, &data);
-		if (ret<0)
-		{
-			break;
-		}
-		
-		fprintf(stderr, "Read: %lu ", data);
-		
-	}
-	
-	bit_close(my_bitio_c);
-}
-
 int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, int verbose){
 	struct stat file_info;
 	uint64_t size_compr;
@@ -160,8 +137,8 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 		
 	} else {
 		if (verbose == 1){
-			fprintf(stderr, ("Output file size: %luB\n", size_compr);
-			fprintf(stderr, "Percentage of compression %0.2f%%\n", (double)size_compr/(double)hd->orig_size*100);
+			fprintf(stderr, "Output file size: %luB\n", size_compr);
+			fprintf(stderr, "Percentage of compression %0.2f%%\n", (double)(hd->orig_size-size_compr)/(double)hd->orig_size*100);
 			gettimeofday(&stop, NULL);
 			fprintf(stderr, "Compression completed in %i milliseconds\n\n", (int)(stop.tv_sec-t.tv_sec)*1000+(int)(stop.tv_usec-t.tv_usec)/1000);
 		}
@@ -280,7 +257,7 @@ int main(int argc, char *argv []) {
 
 	
 	if (compr == 0 && dest == NULL){	
-		fprintf(stderr, "You don't have specified an output name.\n");
+		fprintf(stderr, "You haven't specified an output name.\n");
 		
 		char *extension;
 		
@@ -293,7 +270,7 @@ int main(int argc, char *argv []) {
 
 		strcat(dest, ".cgt");
 			
-		fprintf(stderr, "\nWe will use this name: %s\n", dest);
+		fprintf(stderr, "We will use this name: %s\n", dest);
 	}
 	
 	if (source == NULL){
@@ -424,12 +401,12 @@ int main(int argc, char *argv []) {
 		
 		if (verbose == 1){
 			fprintf(stderr, "Decompression completed.\n");
-		}
-		
-		if (verbose == 1){
 			fprintf(stderr, "\n--Decompressed file--\n");
+			fprintf(stderr, "Output file name: %s\n", dest);
 			gettimeofday(&stop, NULL);
 			fprintf(stderr, "Decompression completed in %i milliseconds\n", (int)(stop.tv_sec-start.tv_sec)*1000+(int)(stop.tv_usec-start.tv_usec)/1000);
+		} else {
+			fprintf(stderr, "Output file name: %s\n", dest);
 		}
 		
 		file = fopen(dest, "r");
