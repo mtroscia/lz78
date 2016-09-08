@@ -160,7 +160,7 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 		
 	} else {
 		if (verbose == 1){
-			fprintf(stderr, ("Output file size: %luB\n", size_compr);
+			fprintf(stderr, "Output file size: %luB\n", size_compr);
 			fprintf(stderr, "Percentage of compression %0.2f%%\n", (double)size_compr/(double)hd->orig_size*100);
 			gettimeofday(&stop, NULL);
 			fprintf(stderr, "Compression completed in %i milliseconds\n\n", (int)(stop.tv_sec-t.tv_sec)*1000+(int)(stop.tv_usec-t.tv_usec)/1000);
