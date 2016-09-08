@@ -280,7 +280,7 @@ int main(int argc, char *argv []) {
 
 	
 	if (compr == 0 && dest == NULL){	
-		fprintf(stderr, "You don't have specified an output name\n.");
+		fprintf(stderr, "You don't have specified an output name.\n");
 		
 		char *extension;
 		

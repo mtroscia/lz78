@@ -29,12 +29,12 @@ unsigned long generate_hash_index (uint32_t father, char symbol){
 }
 
 
-int hash_add (uint32_t father, char symbol, uint32_t child){
+int hash_add (uint32_t father, char symbol){
 	unsigned long index;
 	int collision;
 	
 	//eventually update the number of bits for the symbols
-	if((1<<actual_bits_counter)==hash_elem_counter) 
+	if((1 << actual_bits_counter) == hash_elem_counter) 
 			actual_bits_counter++;
 	
 	//obtain the index into the hash table
@@ -55,7 +55,7 @@ int hash_add (uint32_t father, char symbol, uint32_t child){
 		else
 		{
 			//hash table treated as a circular array
-			index = (index+1)%hash_table_size;
+			index = (index+1) % hash_table_size;
 		}
 	}
 	
@@ -71,14 +71,13 @@ int hash_init(){
 	actual_bits_counter = 9;
 	
 	//add all ASCII characters
-	for (i=0; i<=255; i++)
+	for (i = 0; i <= 255; i++)
 	{
-		c=i;
+		c = i;
 		
-		//printf("Added %c\n", c);
-		
-		ret = hash_add(0, c, ++hash_elem_counter);
-		if (ret!=0){
+		++hash_elem_counter;
+		ret = hash_add(0, c);
+		if (ret != 0){
 			fprintf(stderr, "Error in hash_add()\n");
 			return -1;
 		}
@@ -96,7 +95,7 @@ int hash_reset(){
 	
 	//add all root's children
 	ret = hash_init();	
-	if (ret!=0){
+	if (ret != 0){
 			fprintf(stderr, "Error when reinitializing the hash table\n");
 			return -1;
 	}
@@ -122,7 +121,7 @@ int hash_table_create(uint64_t size){
 	
 	//intialize the hash_table 
 	ret = hash_init();
-	if (ret!=0){
+	if (ret != 0){
 		fprintf(stderr, "Error: hash table has not been initialized.\n");
 		free(hash_table);
 		return -1;
@@ -150,12 +149,12 @@ uint32_t hash_search (uint32_t father, char symbol){
 			not_found = 0;
 		}else
 		{
-			if (hash_table[index].child_index==0)	//empty entry
-			{
+			if (hash_table[index].child_index==0)	
+				//empty entry (the symbol is not present)
 				return 0;
-			} else {  	//search into the next entry
+			else 	
+				//search into the next entry
 				index = (index+1)%hash_table_size;
-			}
 		}		
 	}while (not_found);
 	
@@ -189,11 +188,11 @@ int compress (char* input_file_name)
 	while(1){
 		c = getc(input_file);
 		
-		again:	if (c==EOF)
+		again:	if (c == EOF)
 				{					
 					//emit the last father_index
 					ret = emit((uint64_t)hash_elem_pointer);
-					if (ret<0)
+					if (ret < 0)
 					{
 						fprintf(stderr, "Unable to emit the last symbol\n");
 						free(hash_table);
@@ -202,7 +201,7 @@ int compress (char* input_file_name)
 					
 					//emit the EOF value
 					ret = emit((uint64_t)0);
-					if (ret<0)
+					if (ret < 0)
 					{
 						fprintf(stderr, "Unable to emit the EOF\n");
 						free(hash_table);
@@ -214,7 +213,7 @@ int compress (char* input_file_name)
 			
 				//search the character into the hash table
 				ret = hash_search(hash_elem_pointer, (char)c);
-				if (ret!=0)
+				if (ret != 0)
 				{
 					//correspondent child was found so simply advance the pointer 
 					hash_elem_pointer = ret;
@@ -223,7 +222,7 @@ int compress (char* input_file_name)
 				{
 					//emit the father_index
 					ret = emit((uint64_t)hash_elem_pointer);
-					if (ret<0)
+					if (ret < 0)
 					{
 						fprintf(stderr, "Unable to emit the EOF\n");
 						free(hash_table);
@@ -231,14 +230,12 @@ int compress (char* input_file_name)
 					}
 					
 					if (++hash_elem_counter == dictionary_size)
-					{
 						hash_reset();
-					}
 					
 					else{
  						//add the new node 
- 						ret = hash_add(hash_elem_pointer, (char)c, hash_elem_counter);
- 						if (ret!=0){
+ 						ret = hash_add(hash_elem_pointer, (char)c);
+ 						if (ret != 0){
  							fprintf(stderr, "Error in hash_add");
  							free(hash_table);
  							return -1;
