@@ -7,12 +7,12 @@ int array_add(uint32_t father_index, char character)
 	array_elem_counter++;
 	
 	//eventually update the number of bits for the symbols
-	if((1<<actual_bits_counter)==array_elem_counter) 
+	if((1<<actual_bits_counter) == array_elem_counter) 
 			actual_bits_counter++;
 	
 	//add the element
-	dictionary[array_elem_counter].father_index =father_index;
-	dictionary[array_elem_counter].character =character;
+	dictionary[array_elem_counter].father_index = father_index;
+	dictionary[array_elem_counter].character = character;
 	
 	return 0;
 }
@@ -27,13 +27,13 @@ int array_init(){
 	actual_bits_counter = 9;
 	
 	//add all ASCII characters
-	for (i=0; i<=255; i++)
+	for (i = 0; i <= 255; i++)
 	{
-		c=i;
+		c = i;
 		
 		//add
 		ret = array_add(0, c);
-		if (ret!=0){
+		if (ret != 0){
 			fprintf(stderr, "Error in array_add()\n");
 			return -1;
 		}
@@ -51,7 +51,7 @@ int array_reset(){
 	
 	//add all the root's children
 	ret = array_init();	
-	if (ret!=0){
+	if (ret != 0){
 		fprintf(stderr, "Error when reinitializing the hash table\n");
 		return -1;
 	}    
@@ -149,14 +149,12 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 	{	
 		//add the read character to the buffer
 		character = dictionary[child_index].character;
-		decomp_buffer[i]=character;       
+		decomp_buffer[i] = character;       
 			
 		//if the last inserted node (its character is not defined!) is equal to the 
 		//received symbol, then we set the unlikely flag
 		if ((i == 0) && (child_index == (array_elem_counter-1)))
-        {
             unlikely = 1;
-        }
 				
 		//the next node index
 		child_index = dictionary[child_index].father_index;
@@ -184,10 +182,8 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 		dictionary[array_elem_counter-1].character = character;
 	
 	if (unlikely)
-    {
 		//decomp_buffer[0] has an unspecified value
         decomp_buffer[0] = decomp_buffer[i];    
-    }
 		
 	decomp_buffer[++i] = '\0';
 	
@@ -201,9 +197,9 @@ int decode(FILE* f)
 	uint64_t node_index;
 	int ret;
 	
-	unknown_node=0;
+	unknown_node = 0;
 	
-	printf ("\nIn decode\n");
+	fprintf (stderr, "\nIn decode\n");
 	while (1)
 	{
 		//we read a symbol
@@ -216,9 +212,7 @@ int decode(FILE* f)
 		
 		//EOF symbol reached
 		if (node_index == 0)
-		{
 			break;
-		}
 		
 		if (array_elem_counter < dictionary_size-1)
         {
@@ -230,6 +224,7 @@ int decode(FILE* f)
             //browse the tree
             ret = find_path(node_index, unknown_node, f);
 			if (ret == -1) {
+				fprintf(stderr, "Error in find_path()\n");
 				return -1;
 			}
 			
@@ -244,6 +239,7 @@ int decode(FILE* f)
 			//emit the last chars
 			ret = find_path(node_index, unknown_node, f);
 			if (ret == -1) {
+				fprintf(stderr, "Error in find_path()\n");
 				return -1;
 			}
 			
