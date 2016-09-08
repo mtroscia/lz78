@@ -7,7 +7,7 @@ int array_add(uint32_t father_index, char character)
 	array_elem_counter++;
 	
 	//eventually update the number of bits for the symbols
-	if((1<<actual_bits_counter) == array_elem_counter) 
+	if((1 << actual_bits_counter) == array_elem_counter) 
 			actual_bits_counter++;
 	
 	//add the element
