@@ -1,5 +1,6 @@
 #include "compressor.h"
 
+//djb2 hash algorithm
 unsigned long hash(unsigned char *str){
     unsigned long hash = 5381;
     int c;
@@ -55,7 +56,7 @@ int hash_add (uint32_t father, char symbol){
 		else
 		{
 			//hash table treated as a circular array
-			index = (index+1) % hash_table_size;
+			index = (index + 1) % hash_table_size;
 		}
 	}
 	
@@ -154,7 +155,7 @@ uint32_t hash_search (uint32_t father, char symbol){
 				return 0;
 			else 	
 				//search into the next entry
-				index = (index+1)%hash_table_size;
+				index = (index + 1)%hash_table_size;
 		}		
 	}while (not_found);
 	
