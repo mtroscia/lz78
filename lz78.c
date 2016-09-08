@@ -410,6 +410,10 @@ int main(int argc, char *argv []) {
 		}
 		
 		file = fopen(dest, "r");
+		if (file == NULL){
+			fprintf(stderr, "File can't be opened in read mode\n");
+			exit(1);
+		}
 		
 		ret = check_integrity(hd, file); 
 		if (ret == -1) {
