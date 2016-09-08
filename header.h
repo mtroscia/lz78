@@ -26,9 +26,6 @@ struct header{
 	int dict_size;
 };
 
-//void print_bytes(const void*, size_t);
-//void print_header(struct header* hd);
-
 struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_size, int v);
 int add_header(struct bitio* my_bitio, struct header* hd);
 
