@@ -43,7 +43,7 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 		return -1;
 	}
 	
-	header_size = 8+8+8*hd->orig_filename_len+64+64+8*SHA256_DIGEST_LENGTH+8+32;
+	header_size = 8 + 8 + 8 * hd->orig_filename_len + 64 + 64 + 8 * SHA256_DIGEST_LENGTH + 8 + 32;
 	size_compr = (uint64_t)file_info.st_size - (uint64_t)header_size;
 	
 	if (verbose == 1){
@@ -67,7 +67,7 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 		}
 		
 		b = bit_open(d_name, 1);
-		if (b==NULL) {
+		if (b == NULL) {
 			fprintf(stderr, "Error in opening bitio...\n");
 			return -1;
 		}
@@ -82,7 +82,7 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 			fprintf(stderr, "Error in bit_write()\n");
 			return -1;
 		}
-		for (i=0; i<hd->orig_filename_len; i++){
+		for (i = 0; i < hd->orig_filename_len; i++){
 			ret = bit_write(b, 8, (char)hd->orig_filename[i]);
 			if (ret != 0) {
 				fprintf(stderr, "Error in bit_write()\n");
@@ -99,7 +99,7 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 			fprintf(stderr, "Error in bit_write()\n");
 			return -1;
 		}
-		for (i=0; i<SHA256_DIGEST_LENGTH; i++){
+		for (i = 0; i < SHA256_DIGEST_LENGTH; i++){
 			ret = bit_write(b, 8, (unsigned char)hd->checksum[i]);
 			if (ret != 0) {
 				fprintf(stderr, "Error in bit_write()\n");
@@ -119,7 +119,7 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 			return -1;
 		}
 		
-		fseek(fp_d, header_size-40, SEEK_SET);
+		fseek(fp_d, header_size - 40, SEEK_SET);
 		fseek(fp_s, 0, SEEK_SET);
 		
 		do {
@@ -151,8 +151,8 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 
 int obtain_orig_file(struct bitio* b, struct header* hd, char* dest){
 	int header_size, ret, ret_r, buf_size = 1024;
-	FILE* file_r, *file_w;
-	void* buf;
+	FILE *file_r, *file_w;
+	void *buf;
 	
 	file_r = get_pointer(b);
 	if (file_r <= 0){
@@ -167,7 +167,7 @@ int obtain_orig_file(struct bitio* b, struct header* hd, char* dest){
 	
 	buf = malloc(hd->orig_size);
 			
-	header_size = 8+8+8*hd->orig_filename_len+64+64+8*SHA256_DIGEST_LENGTH;
+	header_size = 8 + 8 + 8 * hd->orig_filename_len + 64 + 64 + 8 * SHA256_DIGEST_LENGTH;
 	fseek(file_r, header_size, SEEK_SET);
 			
 	do {
@@ -191,7 +191,7 @@ int obtain_orig_file(struct bitio* b, struct header* hd, char* dest){
 
 int main(int argc, char *argv []) {
     int compr = -1, ret, verbose = 0, opt;
-    //compr is set to 1 to compress, set to 2 to decompress
+    //compr is set to 0 to compress, set to 1 to decompress
     char* source = NULL, *dest = NULL;
     unsigned int dict_size = DICT_SIZE;
 	FILE* file;
@@ -249,7 +249,7 @@ int main(int argc, char *argv []) {
          } //switch (opt)
     } //while ()
 	
-	if (compr==-1){
+	if (compr == -1){
 		fprintf(stderr, "Error: you must specify either -c or -d option\n");
 		print_help();
 		exit(1);
@@ -274,14 +274,14 @@ int main(int argc, char *argv []) {
 	}
 	
 	if (source == NULL){
-		fprintf(stderr, "Error: you must always specify the input files\n");
+		fprintf(stderr, "Error: you must always specify the input file\n");
 		exit(1);
 	}
     
 	if (compr==0){		//COMPRESSION	
 	
 		file = fopen(source, "r");
-		if (file < 0){
+		if (file == NULL){
 			fprintf(stderr, "Error: file can't be opened in read mode\n");
 			exit(1);
 		}
@@ -343,7 +343,7 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-	} else if (compr==1){		//DECOMPRESSION
+	} else if (compr == 1){		//DECOMPRESSION
 		
 		my_bitio_d = bit_open(source, 0);
 		if (my_bitio_d == NULL){
@@ -410,6 +410,10 @@ int main(int argc, char *argv []) {
 		}
 		
 		file = fopen(dest, "r");
+		if (file == NULL){
+			fprintf(stderr, "File can't be opened in read mode\n");
+			exit(1);
+		}
 		
 		ret = check_integrity(hd, file); 
 		if (ret == -1) {
