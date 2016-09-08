@@ -2,16 +2,16 @@
 
 #include "header.h"
 
-void print_bytes(const void* object, size_t size){
+/*void print_bytes(const void* object, size_t size){
   const unsigned char* bytes = object;
   size_t i;
 
   for(i=0; i<size; i++)
   {
-    printf("%02x ", bytes[i]);
+    fprintf(stderr, "%02x ", bytes[i]);
   }
-  printf("\n");
-}
+  fprintf(stderr, "\n");
+}*/
 
 int create_checksum(FILE* fd, int size, unsigned char** out) {	
 	int ret, ret_r, i;
@@ -52,25 +52,26 @@ int create_checksum(FILE* fd, int size, unsigned char** out) {
 }
 
 //testing
-void print_header(struct header* hd){
-	printf("hd->compressed\t\t %i\n", hd->compressed);
-	printf("hd->orig_filename_len\t %i\n", hd->orig_filename_len);
-	printf("hd->orig_filename\t %s\n", hd->orig_filename);
-	printf("hd->orig_size\t\t %lu\n", hd->orig_size);
-	printf("hd->orig_creation_time\t %lu\n", hd->orig_creation_time);
-	printf("hd->checksum\t\t ");
+/*void print_header(struct header* hd){
+	fprintf(stderr, "hd->compressed\t\t %i\n", hd->compressed);
+	fprintf(stderr, "hd->orig_filename_len\t %i\n", hd->orig_filename_len);
+	fprintf(stderr, "hd->orig_filename\t %s\n", hd->orig_filename);
+	fprintf(stderr, "hd->orig_size\t\t %lu\n", hd->orig_size);
+	fprintf(stderr, "hd->orig_creation_time\t %lu\n", hd->orig_creation_time);
+	fprintf(stderr, "hd->checksum\t\t ");
 	print_bytes(hd->checksum, SHA256_DIGEST_LENGTH);
 	if (hd->compressed == 1){
-		printf("hd->compr_alg\t\t %i\n", hd->compr_alg);
-		printf("hd->dict_size\t\t %i\n", hd->dict_size);
+		fprintf(stderr, "hd->compr_alg\t\t %i\n", hd->compr_alg);
+		fprintf(stderr, "hd->dict_size\t\t %i\n", hd->dict_size);
 	}
-}
+}*/
 	
-struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_size){
+struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_size, int verbose){
 	struct header* hd;
 	struct stat file_info;
 	int ret;
 	unsigned char* out;
+	struct tm* info;
 	
 	if (file == NULL){
 		fprintf(stderr, "One of the passed parameters is NULL\n");
@@ -108,7 +109,13 @@ struct header* generate_header(FILE* file, char* file_name, uint8_t alg, int d_s
 	hd->compr_alg = alg;
 	hd->dict_size = d_size;
 	
-	print_header(hd);
+	if (verbose == 1){
+		fprintf(stderr, "\n--Original file--\n");
+		fprintf(stderr, "File name: %s\n", hd->orig_filename);
+		fprintf(stderr, "Size: %luB\n", hd->orig_size);
+		info = gmtime((time_t*)&hd->orig_creation_time);
+		fprintf(stderr, "Creation time: %i-%02i-%02i %02i:%02i:%02i\n\n", info->tm_year+1900, info->tm_mon+1, info->tm_mday, info->tm_hour, info->tm_min, info->tm_sec);
+	}
 	
 	return hd;
 }
@@ -178,7 +185,6 @@ int add_header(struct bitio* my_bitio, struct header* hd) {
 		return -1;
 	}
 	
-	printf("Header has been written\n");
 	return 0;
 }
 
@@ -196,8 +202,6 @@ struct header* get_header(struct bitio* my_bitio){
 	if (hd == NULL){
 		return NULL;
 	}
-	
-	printf("Start reading from input file...\n");
 	
 	ret = bit_read(my_bitio, 8, &buf);
 	if (ret != 8) {
@@ -263,9 +267,6 @@ struct header* get_header(struct bitio* my_bitio){
 		hd->dict_size = le32toh((int)buf);
 	}
 	
-	printf("Header has been read\n");
-	print_header(hd);
-	
 	return hd;
 }
 
@@ -295,7 +296,7 @@ int check_integrity(struct header* hd, FILE* file){
 	size = (uint64_t)file_info.st_size;
 	
 	//testing
-	//printf("size %lu received %lu\n", size, hd->orig_size);
+	//fprintf(stderr, "size %lu received %lu\n", size, hd->orig_size);
 	
 	if (size != hd->orig_size) {
 		fprintf(stderr, "Different file length\n");
@@ -311,9 +312,7 @@ int check_integrity(struct header* hd, FILE* file){
 	if (memcmp(computed_checksum, hd->checksum, SHA256_DIGEST_LENGTH) != 0){
 	    fprintf(stderr, "Checksum verification failed\n");
 	    return -1;
-	  }
-	
-	printf("Checksum verification OK\n");
+	}
 	
 	return 0;
 }
