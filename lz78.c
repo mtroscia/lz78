@@ -236,8 +236,12 @@ int main(int argc, char *argv []) {
 				dest = optarg; //take the output name from optarg
 				break;
 			case 's':
-				dict_size = atoi(optarg);
-				dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000 : dict_size;
+				if (compr == 1)
+					fprintf(stderr,"\nYou can't choose the dictionary size in the decompression phase.\nThis option will be ignored\n");
+				else{
+					dict_size = atoi(optarg);
+					dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000 : dict_size;
+				}
 				break;
 			case 'h':
 				print_help();
