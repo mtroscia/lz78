@@ -66,8 +66,6 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd){
 	header_size = 8+8+8*hd->orig_filename_len+64+64+8*SHA256_DIGEST_LENGTH+8+32;
 	size_compr = (uint64_t)file_info.st_size - (uint64_t)header_size;
 	
-	//for testing purposes
-	//size_compr += 1000000;
 	
 	if (size_compr > hd->orig_size){
 		
@@ -320,11 +318,9 @@ int main(int argc, char *argv []) {
 		}
 		
 		ret = decide_file(dest, file, hd);
-		if (ret == -1){
+		if (ret == -1)
 			exit(1);
-		}
 		
-		//print_content(dest);
 		
 	} else if (compr==1){		//DECOMPRESSION
 		
