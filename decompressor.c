@@ -13,8 +13,6 @@ int array_add(uint32_t father_index, char character)
 	//add the element
 	dictionary[array_elem_counter].father_index =father_index;
 	dictionary[array_elem_counter].character =character;
-
-	//print_hash_table();
 	
 	return 0;
 }
@@ -32,8 +30,8 @@ int array_init(){
 	for (i=0; i<=255; i++)
 	{
 		c=i;
-		//printf("Added %c\n", c);
 		
+		//add
 		ret = array_add(0, c);
 		if (ret!=0){
 			fprintf(stderr, "Error in array_add()\n");
@@ -48,10 +46,10 @@ int array_init(){
 int array_reset(){
 	int ret;
 	
-	//reset all fields
+	//reset all the fields
 	bzero(dictionary, dictionary_size*sizeof(struct array_elem));
 	
-	//add all root's children
+	//add all the root's children
 	ret = array_init();	
 	if (ret!=0){
 		fprintf(stderr, "Error when reinitializing the hash table\n");
@@ -67,15 +65,19 @@ int init_decomp(int dict_size)
 {	
 	int ret;
 	
+	//allocate the buffer
 	decomp_buffer = calloc(8, sizeof (char)); 
 	
 	dictionary_size = dict_size;
+	
+	//allocate the tree
 	dictionary = calloc(dictionary_size, sizeof (struct array_elem));
 	if (dictionary == NULL){
 		fprintf(stderr, "Unable to create a valid tree for the decompression phase.\n");
 		return -1;
 	}
 	
+	//initialize the tree
 	ret = array_init();
 	if (ret < 0)
 	{
@@ -99,13 +101,15 @@ int extend_buffer()
 		return -1;
 	}
 	
-	//copy the element from the old buffer to the new one
+	//copy the element from decomp_buffer (global variable) to the new one
 	for (i=0; i < sizeof(decomp_buffer); i++)
 	{
 		new_buffer[i] = decomp_buffer[i];
 	}
 	
 	free(decomp_buffer);
+	
+	//the new buffer is now the global one
 	decomp_buffer = new_buffer;
 	return 0;
 }
@@ -127,7 +131,7 @@ int emit_symbols(FILE* f)
 		j--;
 	}
  
-	//print into the file
+	//print into the output file
 	fprintf(f, "%s", decomp_buffer);
 	
 	return 0;
@@ -143,16 +147,18 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 	
 	while (1)
 	{	
-		//read all the array's info
+		//add the read character to the buffer
 		character = dictionary[child_index].character;
-		
 		decomp_buffer[i]=character;       
-				
+			
+		//if the last inserted node (its character is not defined!) is equal to the 
+		//received symbol, then we set the unlikely flag
 		if ((i == 0) && (child_index == (array_elem_counter-1)))
         {
             unlikely = 1;
         }
 				
+		//the next node index
 		child_index = dictionary[child_index].father_index;
 		
 		if (child_index == 0)	//root of the tree reached
@@ -162,7 +168,6 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 		{
 			// the decomp_buffer is too small
 			ret = extend_buffer();
-			
 			if (ret<0)
 			{
 				fprintf(stderr, "Unable to extend the decompression buffer\n");
@@ -173,17 +178,14 @@ int find_path(uint32_t child_index, int unknown_node, FILE* f)
 		i++;
 	}
 		
-	//at the first step we don't have any node with unknown character value
-    if (unknown_node != 0)
-	{
-		//printf("Update the unknown node%i: %c\n", array_elem_counter-1, character);
-		
+	//at the first step we don't have any node with an unknown character value
+    if (unknown_node != 0)		
 		//there is a child node with an unknown character (it is the last one!)
 		dictionary[array_elem_counter-1].character = character;
-	}
 	
 	if (unlikely)
     {
+		//decomp_buffer[0] has an unspecified value
         decomp_buffer[0] = decomp_buffer[i];    
     }
 		
@@ -204,6 +206,7 @@ int decode(FILE* f)
 	printf ("\nIn decode\n");
 	while (1)
 	{
+		//we read a symbol
 		ret = bit_read(my_bitio_d, actual_bits_counter, &node_index);
 		if (ret<0)
 		{
@@ -219,6 +222,8 @@ int decode(FILE* f)
 		
 		if (array_elem_counter < dictionary_size-1)
         {
+			//there is some space available in the tree
+			
             //add an unknown node
             ret = array_add(node_index, -1);
 				
@@ -232,15 +237,20 @@ int decode(FILE* f)
         }
         else
 		{
-			//browse the tree
+			//the tree is full
+	
 			++array_elem_counter;
+			
+			//emit the last chars
 			ret = find_path(node_index, unknown_node, f);
 			if (ret == -1) {
 				return -1;
 			}
 			
+			//reset the tree
 			array_reset();
 
+			//at the next iteration we have not a node with an unspecified char
             unknown_node = 0;
         }	
 	}
@@ -249,7 +259,7 @@ int decode(FILE* f)
 }
 
 
-int decompress(char* dest_file_name)
+int decompress(char* dest_file_name,int dict_size )
 {
 	//open dest with fopen
 	FILE* f;
@@ -269,6 +279,7 @@ int decompress(char* dest_file_name)
 	}
 
 	fclose(f);
+	free (dictionary);
 	
 	return 0;
 }

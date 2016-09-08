@@ -349,7 +349,7 @@ int main(int argc, char *argv []) {
 			}
 			
 			//decode
-			ret = decompress(dest);
+			ret = decompress(dest, hd->dict_size);
 			if (ret<0){
 				fprintf(stderr, "Error in decompression\n");
 				exit(1);
