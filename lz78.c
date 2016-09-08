@@ -161,7 +161,7 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 	} else {
 		if (verbose == 1){
 			fprintf(stderr, "Output file size: %luB\n", size_compr);
-			fprintf(stderr, "Percentage of compression %0.2f%%\n", (double)size_compr/(double)hd->orig_size*100);
+			fprintf(stderr, "Percentage of compression %0.2f%%\n", (double)(hd->orig_size-size_compr)/(double)hd->orig_size*100);
 			gettimeofday(&stop, NULL);
 			fprintf(stderr, "Compression completed in %i milliseconds\n\n", (int)(stop.tv_sec-t.tv_sec)*1000+(int)(stop.tv_usec-t.tv_usec)/1000);
 		}
@@ -213,14 +213,13 @@ int obtain_orig_file(struct bitio* b, struct header* hd, char* dest){
 
 
 int main(int argc, char *argv []) {
-    int compr = -1, ret, verbose = 0, opt, s;
+    int compr = -1, ret, verbose = 0, opt;
     //compr is set to 1 to compress, set to 2 to decompress
     char* source = NULL, *dest = NULL;
     unsigned int dict_size = DICT_SIZE;
 	FILE* file;
 	struct header* hd = NULL;
 	struct timeval start, stop;
-
 
     while ((opt = getopt(argc, argv, "cdi:o:s:hv"))!=-1) {
         switch (opt) {
@@ -237,9 +236,12 @@ int main(int argc, char *argv []) {
 				dest = optarg; //take the output name from optarg
 				break;
 			case 's':
-				s=1;
-				dict_size = atoi(optarg);
-				dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000 : dict_size;
+				if (compr == 1)
+					fprintf(stderr,"\nYou can't choose the dictionary size in the decompression phase.\nThis option will be ignored\n");
+				else{
+					dict_size = atoi(optarg);
+					dict_size = (dict_size < 500)? 500 : (dict_size > 100000)? 100000 : dict_size;
+				}
 				break;
 			case 'h':
 				print_help();
@@ -276,12 +278,9 @@ int main(int argc, char *argv []) {
 		exit(1);
 	}
 
-	if (compr == 1 && s == 1)
-		fprintf(stderr,"\nYou can't choose the dictionary size in the decompression phase.\nThis option will be ignored\n");
-	
 	
 	if (compr == 0 && dest == NULL){	
-		fprintf(stderr, "You don't have specified an output name.\n");
+		fprintf(stderr, "You haven't specified an output name.\n");
 		
 		char *extension;
 		
@@ -294,7 +293,7 @@ int main(int argc, char *argv []) {
 
 		strcat(dest, ".cgt");
 			
-		fprintf(stderr, "\nWe will use this name: %s\n", dest);
+		fprintf(stderr, "We will use this name: %s\n", dest);
 	}
 	
 	if (source == NULL){
@@ -425,12 +424,12 @@ int main(int argc, char *argv []) {
 		
 		if (verbose == 1){
 			fprintf(stderr, "Decompression completed.\n");
-		}
-		
-		if (verbose == 1){
 			fprintf(stderr, "\n--Decompressed file--\n");
+			fprintf(stderr, "Output file name: %s\n", dest);
 			gettimeofday(&stop, NULL);
 			fprintf(stderr, "Decompression completed in %i milliseconds\n", (int)(stop.tv_sec-start.tv_sec)*1000+(int)(stop.tv_usec-start.tv_usec)/1000);
+		} else {
+			fprintf(stderr, "Output file name: %s\n", dest);
 		}
 		
 		file = fopen(dest, "r");
