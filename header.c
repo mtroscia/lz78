@@ -2,21 +2,10 @@
 
 #include "header.h"
 
-/*void print_bytes(const void* object, size_t size){
-  const unsigned char* bytes = object;
-  size_t i;
-
-  for(i=0; i<size; i++)
-  {
-    fprintf(stderr, "%02x ", bytes[i]);
-  }
-  fprintf(stderr, "\n");
-}*/
-
 int create_checksum(FILE* fd, int size, unsigned char** out) {	
 	int ret, ret_r, i;
 	SHA256_CTX* ctx;
-	int buf_size = 256;
+	int buf_size = 1024;
 	void* in = malloc(buf_size);
 	int num_blocks = size/buf_size + 1;
 	

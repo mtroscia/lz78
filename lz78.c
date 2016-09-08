@@ -24,29 +24,6 @@ void print_help()
 	fprintf(stderr, "-v verbose\n\n");
 }
 
-//testing
-void print_content(char* dest)
-{
-	my_bitio_c = bit_open(dest, 0);
-	uint64_t data;
-	int ret;
-	
-	ret=0;
-	while (1)
-	{
-		ret = bit_read(my_bitio_c, 9, &data);
-		if (ret<0)
-		{
-			break;
-		}
-		
-		fprintf(stderr, "Read: %lu ", data);
-		
-	}
-	
-	bit_close(my_bitio_c);
-}
-
 int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, int verbose){
 	struct stat file_info;
 	uint64_t size_compr;
