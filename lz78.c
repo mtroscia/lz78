@@ -8,13 +8,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/time.h>
 
 #define DICT_SIZE 65535
 #define LZ78 1
 
 void print_help()
 {
-    printf("Usage:\n");
+    printf("\nUsage:\n");
 	printf("lz78 -c -i <input_file> -o <output_file> for compression\n");
 	printf("lz78 -d -i <input_file> -o <output_file> for decompression\n\n");
 	printf("Other options:\n");
@@ -23,6 +24,7 @@ void print_help()
 	printf("-v verbose\n\n");
 }
 
+//testing
 void print_content(char* dest)
 {
 	my_bitio_c = bit_open(dest, 0);
@@ -45,13 +47,14 @@ void print_content(char* dest)
 	bit_close(my_bitio_c);
 }
 
-int decide_file(char* d_name, FILE* fp_s, struct header* hd){
+int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, int verbose){
 	struct stat file_info;
 	uint64_t size_compr;
 	int header_size, ret, ret_r, i, buf_size = 1024;
 	FILE* fp_d = NULL;
 	void* buf = malloc(buf_size);
 	struct bitio* b;
+	struct timeval stop;
 	
 	if (fp_s == NULL || hd == NULL) {
 		fprintf(stderr, "One of the passed parameters is NULL\n");
@@ -66,10 +69,17 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd){
 	header_size = 8+8+8*hd->orig_filename_len+64+64+8*SHA256_DIGEST_LENGTH+8+32;
 	size_compr = (uint64_t)file_info.st_size - (uint64_t)header_size;
 	
+	if (verbose == 1){
+		printf("\n--Compressed file--\n");
+		printf("Output file name: %s\n", d_name);
+	}
 	
 	if (size_compr > hd->orig_size){
 		
-		printf("Original file will be sent.\n");
+		if (verbose == 1){
+			printf("Output file size: %luB\n", hd->orig_size);
+			printf("Compressed file is larger than the original one.\n\n");
+		}
 		
 		hd->compressed = 0;
 		
@@ -149,8 +159,13 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd){
 		} while (ret_r);
 		
 	} else {
+		if (verbose == 1){
+			printf("Output file size: %luB\n", size_compr);
+			printf("Percentage of compression %0.2f%%\n", (double)size_compr/(double)hd->orig_size*100);
+			gettimeofday(&stop, NULL);
+			printf("Compression completed in %i milliseconds\n\n", (int)(stop.tv_sec-t.tv_sec)*1000+(int)(stop.tv_usec-t.tv_usec)/1000);
+		}
 		
-		printf("Compression completed.\n");
 	}
 	
 	return 0;
@@ -204,6 +219,7 @@ int main(int argc, char *argv []) {
     unsigned int dict_size = DICT_SIZE;
 	FILE* file;
 	struct header* hd = NULL;
+	struct timeval start, stop;
 
     while ((opt = getopt(argc, argv, "cdi:o:s:hv"))!=-1) {
         switch (opt) {
@@ -265,6 +281,7 @@ int main(int argc, char *argv []) {
 	}
     
 	if (compr==0){		//COMPRESSION	
+	
 		file = fopen(source, "r");
 		if (file < 0){
 			fprintf(stderr, "Error: file can't be opened in read mode\n");
@@ -277,7 +294,7 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		hd = generate_header(file, source, LZ78, dict_size);
+		hd = generate_header(file, source, LZ78, dict_size, verbose);
 		if (hd == NULL) {
 			exit(1);
 		}
@@ -295,6 +312,7 @@ int main(int argc, char *argv []) {
 		}
 		
 		//call the compression algorithm
+		gettimeofday(&start, NULL);
 		ret = compress(source);
 		if (ret == -1)
 		{
@@ -317,10 +335,17 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
-		ret = decide_file(dest, file, hd);
-		if (ret == -1)
-			exit(1);
+		if (verbose == 1){
+			printf("Compression completed.\n");
+		}
 		
+		
+		ret = decide_file(dest, file, hd, start, verbose);
+		if (ret == -1){
+			exit(1);
+		}
+		
+		//print_content(dest);
 		
 	} else if (compr==1){		//DECOMPRESSION
 		
@@ -336,6 +361,13 @@ int main(int argc, char *argv []) {
 			exit(1);
 		}
 		
+		gettimeofday(&start, NULL);
+		
+		if (verbose == 1){
+			printf("\n--Compressed file--\n");
+			printf("File name: %s\n\n", source);
+		}
+		
 		if (hd->compressed == 1){		//original file compressed
 			//initialize all the data structure
 			ret = init_decomp(hd->dict_size);
@@ -345,7 +377,7 @@ int main(int argc, char *argv []) {
 			}
 			
 			//decode
-			ret = decompress(dest, hd->dict_size);
+			ret = decompress(dest);
 			if (ret<0){
 				fprintf(stderr, "Error in decompression\n");
 				exit(1);
@@ -357,8 +389,6 @@ int main(int argc, char *argv []) {
 				fprintf(stderr, "Unable to close the file\n");
 				exit (1);
 			}
-	
-			printf("Decompression completed.\n");
 			
 		} else {			//original file not compressed
 		
@@ -368,11 +398,25 @@ int main(int argc, char *argv []) {
 			}
 		}
 		
+		if (verbose == 1){
+			printf("Decompression completed.\n");
+		}
+		
+		if (verbose == 1){
+			printf("\n--Decompressed file--\n");
+			gettimeofday(&stop, NULL);
+			printf("Decompression completed in %i milliseconds\n", (int)(stop.tv_sec-start.tv_sec)*1000+(int)(stop.tv_usec-start.tv_usec)/1000);
+		}
+		
 		file = fopen(dest, "r");
 		
 		ret = check_integrity(hd, file); 
 		if (ret == -1) {
 			exit(1);
+		}
+		
+		if (verbose == 1){
+			printf("No errors occur while decompressing.\n\n");
 		}
 	}
 		

@@ -21,8 +21,8 @@ int hash_elem_counter;	//number of element in the hash table
 int hash_elem_pointer;	//pointer to the actual node
 int actual_bits_counter;//number of bits for the current symbol
 unsigned long hash(unsigned char*);
-struct bitio* my_bitio_c;
 
+struct bitio* my_bitio_c;
 
 //create table of dimension dict_size
 int hash_table_create(uint64_t size);
