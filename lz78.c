@@ -15,13 +15,13 @@
 
 void print_help()
 {
-    printf("\nUsage:\n");
-	printf("lz78 -c -i <input_file> -o <output_file> for compression\n");
-	printf("lz78 -d -i <input_file> -o <output_file> for decompression\n\n");
-	printf("Other options:\n");
-	printf("-s <dictionary_size>\n");
-	printf("-h \thelp\n");
-	printf("-v verbose\n\n");
+	fprintf(stderr, "\nUsage:\n");
+	fprintf(stderr, "lz78 -c -i <input_file> -o <output_file> for compression\n");
+	fprintf(stderr, "lz78 -d -i <input_file> -o <output_file> for decompression\n\n");
+	fprintf(stderr, "Other options:\n");
+	fprintf(stderr, "-s <dictionary_size>\n");
+	fprintf(stderr, "-h \thelp\n");
+	fprintf(stderr, "-v verbose\n\n");
 }
 
 //testing
@@ -40,7 +40,7 @@ void print_content(char* dest)
 			break;
 		}
 		
-		printf("Read: %lu ", data);
+		fprintf(stderr, "Read: %lu ", data);
 		
 	}
 	
@@ -70,15 +70,15 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 	size_compr = (uint64_t)file_info.st_size - (uint64_t)header_size;
 	
 	if (verbose == 1){
-		printf("\n--Compressed file--\n");
-		printf("Output file name: %s\n", d_name);
+		fprintf(stderr, "\n--Compressed file--\n");
+		fprintf(stderr, "Output file name: %s\n", d_name);
 	}
 	
 	if (size_compr > hd->orig_size){
 		
 		if (verbose == 1){
-			printf("Output file size: %luB\n", hd->orig_size);
-			printf("Compressed file is larger than the original one.\n\n");
+			fprintf(stderr, "Output file size: %luB\n", hd->orig_size);
+			fprintf(stderr, "Compressed file is larger than the original one.\n\n");
 		}
 		
 		hd->compressed = 0;
@@ -160,10 +160,10 @@ int decide_file(char* d_name, FILE* fp_s, struct header* hd, struct timeval t, i
 		
 	} else {
 		if (verbose == 1){
-			printf("Output file size: %luB\n", size_compr);
-			printf("Percentage of compression %0.2f%%\n", (double)size_compr/(double)hd->orig_size*100);
+			fprintf(stderr, ("Output file size: %luB\n", size_compr);
+			fprintf(stderr, "Percentage of compression %0.2f%%\n", (double)size_compr/(double)hd->orig_size*100);
 			gettimeofday(&stop, NULL);
-			printf("Compression completed in %i milliseconds\n\n", (int)(stop.tv_sec-t.tv_sec)*1000+(int)(stop.tv_usec-t.tv_usec)/1000);
+			fprintf(stderr, "Compression completed in %i milliseconds\n\n", (int)(stop.tv_sec-t.tv_sec)*1000+(int)(stop.tv_usec-t.tv_usec)/1000);
 		}
 		
 	}
@@ -357,7 +357,7 @@ int main(int argc, char *argv []) {
 		}
 		
 		if (verbose == 1){
-			printf("Compression completed.\n");
+			fprintf(stderr, "Compression completed.\n");
 		}
 		
 		
@@ -365,8 +365,6 @@ int main(int argc, char *argv []) {
 		if (ret == -1){
 			exit(1);
 		}
-		
-		//print_content(dest);
 		
 	} else if (compr==1){		//DECOMPRESSION
 		
@@ -390,8 +388,8 @@ int main(int argc, char *argv []) {
 		gettimeofday(&start, NULL);
 		
 		if (verbose == 1){
-			printf("\n--Compressed file--\n");
-			printf("File name: %s\n\n", source);
+			fprintf(stderr, "\n--Compressed file--\n");
+			fprintf(stderr, "File name: %s\n\n", source);
 		}
 		
 		if (hd->compressed == 1){		//original file compressed
@@ -425,13 +423,13 @@ int main(int argc, char *argv []) {
 		}
 		
 		if (verbose == 1){
-			printf("Decompression completed.\n");
+			fprintf(stderr, "Decompression completed.\n");
 		}
 		
 		if (verbose == 1){
-			printf("\n--Decompressed file--\n");
+			fprintf(stderr, "\n--Decompressed file--\n");
 			gettimeofday(&stop, NULL);
-			printf("Decompression completed in %i milliseconds\n", (int)(stop.tv_sec-start.tv_sec)*1000+(int)(stop.tv_usec-start.tv_usec)/1000);
+			fprintf(stderr, "Decompression completed in %i milliseconds\n", (int)(stop.tv_sec-start.tv_sec)*1000+(int)(stop.tv_usec-start.tv_usec)/1000);
 		}
 		
 		file = fopen(dest, "r");
@@ -442,7 +440,7 @@ int main(int argc, char *argv []) {
 		}
 		
 		if (verbose == 1){
-			printf("No errors occur while decompressing.\n\n");
+			fprintf(stderr, "No errors occur while decompressing.\n\n");
 		}
 	}
 		
