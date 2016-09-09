@@ -281,7 +281,7 @@ int main(int argc, char *argv []) {
 	if (compr==0){		//COMPRESSION	
 	
 		file = fopen(source, "r");
-		if (file < 0){
+		if (file == NULL){
 			fprintf(stderr, "Error: file can't be opened in read mode\n");
 			exit(1);
 		}
@@ -410,6 +410,10 @@ int main(int argc, char *argv []) {
 		}
 		
 		file = fopen(dest, "r");
+		if (file == NULL){
+			fprintf(stderr, "File can't be opened in read mode\n");
+			exit(1);
+		}
 		
 		ret = check_integrity(hd, file); 
 		if (ret == -1) {
